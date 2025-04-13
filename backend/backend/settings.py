@@ -28,9 +28,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', '212.227.250.38', 'localhost', 'gkablog.com']
+ALLOWED_HOSTS = ['127.0.0.1', '212.227.250.38', 'localhost', 'gkablog.com', 'www.gkablog.com']
 
 
 # Application definition
