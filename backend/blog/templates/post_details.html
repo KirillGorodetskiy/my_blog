@@ -15,7 +15,7 @@
     <!-- 📝 Post Header -->
     <div class="mb-4">
       <h1 class="text-primary">{{ post.title }}</h1>
-      <p class="text-muted">🆔 ID: {{ post.id }}</p>
+      <p class="text-muted">🆔: {{ post.id }}</p>
       <small class="text-secondary">Published at: {{ post.created_at|date:"M d, Y H:i" }}</small>
     </div>
 
@@ -24,6 +24,7 @@
       <p class="fs-5">{{ post.body }}</p>
     </div>
 
+    {% if user.is_authenticated and user.is_superuser %}
     <!-- 🗑 Delete Button -->
     <form method="post" action="{% url 'delete_post' post.id %}" class="mb-4">
       {% csrf_token %}
@@ -33,6 +34,11 @@
       </button>
       <a href="/" class="btn btn-secondary ms-2">⬅ Back to Home</a>
     </form>
+        
+    <!--  Edit project -->
+        <a href="{% url 'edit_post' id=post.id %}" class="btn btn-success">✏️ Edit Post</a>
+    {% endif %}
+
 
   </div>
 

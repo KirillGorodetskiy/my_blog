@@ -16,14 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from blog.views import show_all_posts, show_post, add_post, delete_post, my_projects
+from blog.views import show_all_posts, show_post, add_post, delete_post, my_projects, add_project, edit_project, edit_post
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', show_all_posts, name='home'),
     path('post/<int:id>', show_post, name='post_detail'),
-    path('add/', add_post, name='add_post'),
+    path('post/<int:id>/edit/', edit_post, name='edit_post'),
+    path('add_post/', add_post, name='add_post'),
     path('post/<int:post_id>/delete/', delete_post, name='delete_post'),
     path('my_projects/', my_projects, name='my_projects'),
+    path('add_project/', add_project, name='add_project'),
+    path('projects/<int:pk>/edit/', edit_project, name='edit_project'),
     path('accounts/', include('django.contrib.auth.urls')),
 ]

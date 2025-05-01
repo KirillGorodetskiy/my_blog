@@ -36,12 +36,22 @@
         </div>
 
         <div class="mb-3">
-          {{ form.body.label_tag }}
-          {{ form.body }}
+          {{ form.description.label_tag }}
+          {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+          {{ form.live_link.label_tag }}
+          {{ form.live_link }}
+        </div>
+
+        <div class="mb-3">
+          {{ form.github_link.label_tag }}
+          {{ form.github_link }}
         </div>
 
         <button type="submit" class="btn btn-success">✅ {{ button_text }}</button>
-        <a href="/" class="btn btn-outline-secondary ms-2">⬅ Back</a>
+        <a href="/my_projects" class="btn btn-outline-secondary ms-2">⬅ Back</a>
       </form>
 
     </div>

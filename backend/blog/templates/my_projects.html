@@ -23,6 +23,13 @@
   <div class="container py-5">
     <h2 class="mb-4 text-primary">💼 My Projects</h2>
 
+    {% if user.is_authenticated and user.is_superuser %}
+    <!-- ➕ Add project -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <a href="{% url 'add_project' %}" class="btn btn-success">➕ Add New Project</a>
+    </div>
+    {% endif %}
+
     
     <div class="row g-4">
         {% for project in projects %}
@@ -39,6 +46,14 @@
                 {% if project.github_link %}
                   <a href="{{ project.github_link }}" class="btn btn-outline-secondary btn-sm" target="_blank">💻 GitHub</a>
                 {% endif %}
+
+                {% if user.is_authenticated and user.is_superuser %}
+                <!--  Edit project -->
+                
+                  <a href="{% url 'edit_project' pk=project.pk %}" class="btn btn-success">✏️ Edit Project</a>
+
+                {% endif %}
+
               </div>
             </div>
           </div>
