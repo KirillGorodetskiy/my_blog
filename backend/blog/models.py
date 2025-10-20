@@ -78,7 +78,7 @@ class Post(models.Model):
         ordering = ['-created_at']
 
     def __str__(self) -> str:
-        return f' (Post # {self.id})   {self.title}'
+        return f' (Post # {self.pk})   {self.title}'
 
     def save(self, *args, **kwargs):
         if not self.slug:

@@ -1,4 +1,4 @@
-from backend.backend.utils.config_check import check_required_env_vars
+from backend.utils.config_check import check_required_env_vars
 
 
 REQUIRED_ENV_VARS = (
