@@ -12,20 +12,37 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import logging
 from dotenv import load_dotenv
 
-load_dotenv()
+from backend.utils.config_check import check_required_env_vars
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s"
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+REQUIRED_ENV_VARS = (
+    'DJANGO_SECRET_KEY',
+    'DB_NAME',
+    'DB_USER',
+    'DB_PASSWORD',
+    'DB_HOST',
+    'DB_PORT',
+)
+
+load_dotenv()
+check_required_env_vars(REQUIRED_ENV_VARS)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False

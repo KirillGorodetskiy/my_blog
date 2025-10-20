@@ -42,6 +42,7 @@ def add_project(request):
     else:
         form = ProjectForm()
         return render(request, 'add_project.html', {'form': form,
+                                                    'form_title': 'Add Project',
                                                     'button_text': 'Add Project'})
     
 @login_required
@@ -83,7 +84,7 @@ def add_post(request):
         form = PostForm()
         return render(request, 'add_post.html', {'form': form,
                                                  'form_title' : 'Add Post' ,
-                                                 'buttin_text': 'Add Post'})
+                                                 'button_text': 'Add Post'})
     
 @login_required
 def edit_post(request, id):

@@ -13,10 +13,11 @@ class PostForm(forms.ModelForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['title', 'description', 'live_link', 'github_link']
+        fields = ['title', 'description', 'icon', 'live_link', 'github_link']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'icon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 🚀 or 💻'}),
             'live_link': forms.TextInput(attrs={'class': 'form-control'}),
             'github_link': forms.TextInput(attrs={'class': 'form-control'}),
         }
