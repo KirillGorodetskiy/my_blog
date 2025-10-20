@@ -1,5 +1,5 @@
 from backend.backend.utils.config_check import check_required_env_vars
-import pytest
+
 
 REQUIRED_ENV_VARS = (
     'DJANGO_SECRET_KEY',
