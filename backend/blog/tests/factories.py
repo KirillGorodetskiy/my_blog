@@ -13,3 +13,16 @@ class ProjectFactory(factory.django.DjangoModelFactory):
     technologies = 'Django, Python'
 
 
+class PostFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Post
+
+    title = factory.Sequence(lambda n: f'Post title {n}')
+    body = 'This is body...'
+
+
+class TagFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Tag
+
+    name = factory.Sequence(lambda n: f'Tag # {n}')

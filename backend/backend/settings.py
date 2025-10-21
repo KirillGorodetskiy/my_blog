@@ -20,7 +20,7 @@ from backend.utils.config_check import check_required_env_vars
 
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s"
 )
 

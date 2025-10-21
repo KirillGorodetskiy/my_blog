@@ -10,12 +10,21 @@ User = get_user_model()
 M = TypeVar('M', bound=models.Model)
 
 
-def get_unique_slug(instance: M, model: Type[M]) -> str:
+def get_unique_slug(
+        instance: M,
+        model: Type[M],
+        source_attr: str = 'title'
+        ) -> str:
     '''
     Generates a unique slug for the given model instance.
     Adds a number suffix if a slug already exists.
     '''
-    base_slug = slugify(getattr(instance, 'title', ''))
+    raw = getattr(instance, source_attr, '')
+    if not raw:
+        raise ValueError(
+            f'{model.__name__}.{source_attr} is empty; cannot build slug.'
+        )
+    base_slug = slugify(raw)
     slug = base_slug
     num = 1
     while (
@@ -55,6 +64,11 @@ class Project(models.Model):
 class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(max_length=60, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = get_unique_slug(self, Tag, 'name')
+        super().save(*args, **kwargs)
 
 
 class Post(models.Model):
