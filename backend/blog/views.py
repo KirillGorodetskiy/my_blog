@@ -4,99 +4,104 @@ from django.template import loader
 from .models import Post, Project
 from .forms import PostForm, ProjectForm
 from django.contrib.auth.decorators import login_required
-
-# Create your views here.
-
-
-def show_all_posts(request):
-    posts = Post.objects.all()
-    context = {
-        'posts': posts,
-    }
-    template = loader.get_template('index.html')
-    return HttpResponse(template.render(context, request))
+from django.views.generic import CreateView, DetailView, DeleteView, ListView, UpdateView
+from django.urls import reverse, reverse_lazy
 
 
-def show_post(request, id):
-    post = Post.objects.get(id=id)
-    context = {
-        'post': post,
-    }
-    template = loader.get_template('post_details.html')
-    return HttpResponse(template.render(context, request))
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/index.html'
 
 
-def my_projects(request):
-    projects = Project.objects.all()
-    context = {'projects': projects}
-    return render(request, 'my_projects.html', context)
+class PostDetailView(DetailView):
+    model = Post
 
 
-@login_required
-def add_project(request):
-    if request.method == 'POST':
-        form = ProjectForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('/my_projects')
-    else:
-        form = ProjectForm()
-        return render(request, 'add_project.html', {'form': form,
-                                                    'form_title': 'Add Project',
-                                                    'button_text': 'Add Project'})
-    
-@login_required
-def edit_project(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+class PostUpdateView(UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/add_post.html'
 
-    if request.method == 'POST':
-        form = ProjectForm(request.POST, instance=project)
-        if form.is_valid():
-            form.save()
-            return redirect('/my_projects')
-    else:
-        form = ProjectForm(instance=project)
-        return render(request, 'add_project.html', {'form': form,
-                                                    'form_title' : 'Edit Project',
-                                                    'button_text': 'Save Changes'})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Edit post'
+        context['button_text'] = 'Save Changes'
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse('post_detail', kwargs={'pk': self.object.pk})
 
 
-@login_required
-def delete_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+class PostCreateView(CreateView):
+    model = Post
+    form_class = PostForm
+    success_url = reverse_lazy('home')
+    template_name = 'blog/add_post.html'
 
-    if request.method == 'POST':
-        post.delete()
-        return redirect('/')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Add Post'
+        context['button_text'] = 'Add Post'
+        return context
 
-    # If the user visits this via GET (e.g., after login redirect), redirect them
-    return redirect('post_detail', id=post_id)
+
+class PostDeleteView(DeleteView):
+    model = Post
+    template_name = 'confirm_delete.html'
+    success_url = reverse_lazy('home')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_name'] = self.object.title
+        context['button_text'] = 'Delete Post'
+        return context
 
 
-@login_required
-def add_post(request):
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('/')
-    else:
-        form = PostForm()
-        return render(request, 'add_post.html', {'form': form,
-                                                 'form_title' : 'Add Post' ,
-                                                 'button_text': 'Add Post'})
-    
-@login_required
-def edit_post(request, id):
-    post = get_object_or_404(Post, id=id)
+class ProjectsListView(ListView):
+    model = Project
+    ordering = 'id'
+    paginate_by = 10
 
-    if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            form.save()
-            return redirect('post_detail', id=post.id)
-    else:
-        form = PostForm(instance=post)
-        return render(request, 'add_post.html', {'form': form,
-                                                 'form_title' : 'Edit Post' ,
-                                                 'button_text': 'Save Changes'})
+
+class ProjectDetailView(DetailView):
+    model = Project
+
+
+class ProjectCreateView(CreateView):
+    model = Project
+    form_class = ProjectForm
+    success_url = reverse_lazy('projects')
+    template_name = 'blog/add_project.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Add Project'
+        context['button_text'] = 'Add Project'
+        return context
+
+
+class ProjectUpdateView(UpdateView):
+    model = Project
+    form_class = ProjectForm
+    template_name = 'blog/add_project.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_title'] = 'Edit Project'
+        context['button_text'] = 'Save Changes'
+        return context
+
+    def get_success_url(self) -> str:
+        return reverse('project_detail', kwargs={'pk': self.object.pk})
+
+
+class ProjectDeleteView(DeleteView):
+    model = Project
+    template_name = 'confirm_delete.html'
+    success_url = reverse_lazy('projects')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['object_name'] = self.object.title
+        context['button_text'] = 'Delete Project'
+        return context
