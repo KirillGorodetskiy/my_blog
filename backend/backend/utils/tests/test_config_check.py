@@ -1,14 +1,5 @@
 from backend.utils.config_check import check_required_env_vars
-
-
-REQUIRED_ENV_VARS = (
-    'DJANGO_SECRET_KEY',
-    'DB_NAME',
-    'DB_USER',
-    'DB_PASSWORD',
-    'DB_HOST',
-    'DB_PORT',
-)
+from backend.settings import REQUIRED_ENV_VARS
 
 
 def test_vars_present(monkeypatch):

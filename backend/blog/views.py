@@ -1,11 +1,19 @@
-from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.template import loader
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import (
+    CreateView, DetailView, DeleteView, ListView, UpdateView
+)
+from django.urls import reverse, reverse_lazy
+
 from .models import Post, Project
 from .forms import PostForm, ProjectForm
-from django.contrib.auth.decorators import login_required
-from django.views.generic import CreateView, DetailView, DeleteView, ListView, UpdateView
-from django.urls import reverse, reverse_lazy
+
+
+class SuperUserOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
+    '''Allow access to unsafe methods to superuser only'''
+    raise_exception = True  # raise 403 Error
+
+    def test_func(self):
+        return self.request.user.is_superuser
 
 
 class PostListView(ListView):
@@ -17,7 +25,7 @@ class PostDetailView(DetailView):
     model = Post
 
 
-class PostUpdateView(UpdateView):
+class PostUpdateView(SuperUserOnlyMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/add_post.html'
@@ -32,7 +40,7 @@ class PostUpdateView(UpdateView):
         return reverse('post_detail', kwargs={'pk': self.object.pk})
 
 
-class PostCreateView(CreateView):
+class PostCreateView(SuperUserOnlyMixin, CreateView):
     model = Post
     form_class = PostForm
     success_url = reverse_lazy('home')
@@ -45,7 +53,7 @@ class PostCreateView(CreateView):
         return context
 
 
-class PostDeleteView(DeleteView):
+class PostDeleteView(SuperUserOnlyMixin, DeleteView):
     model = Post
     template_name = 'confirm_delete.html'
     success_url = reverse_lazy('home')
@@ -67,7 +75,7 @@ class ProjectDetailView(DetailView):
     model = Project
 
 
-class ProjectCreateView(CreateView):
+class ProjectCreateView(SuperUserOnlyMixin, CreateView):
     model = Project
     form_class = ProjectForm
     success_url = reverse_lazy('projects')
@@ -80,7 +88,7 @@ class ProjectCreateView(CreateView):
         return context
 
 
-class ProjectUpdateView(UpdateView):
+class ProjectUpdateView(SuperUserOnlyMixin, UpdateView):
     model = Project
     form_class = ProjectForm
     template_name = 'blog/add_project.html'
@@ -95,7 +103,7 @@ class ProjectUpdateView(UpdateView):
         return reverse('project_detail', kwargs={'pk': self.object.pk})
 
 
-class ProjectDeleteView(DeleteView):
+class ProjectDeleteView(SuperUserOnlyMixin, DeleteView):
     model = Project
     template_name = 'confirm_delete.html'
     success_url = reverse_lazy('projects')
