@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import (
     CreateView, DetailView, DeleteView, ListView, UpdateView
@@ -19,6 +20,7 @@ class SuperUserOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
 class PostListView(ListView):
     model = Post
     template_name = 'blog/index.html'
+    paginate_by = settings.POST_COUNT_ON_PAGE
 
 
 class PostDetailView(DetailView):
@@ -68,7 +70,7 @@ class PostDeleteView(SuperUserOnlyMixin, DeleteView):
 class ProjectsListView(ListView):
     model = Project
     ordering = 'id'
-    paginate_by = 10
+    paginate_by = settings.PROJECT_COUNT_ON_PAGE
 
 
 class ProjectDetailView(DetailView):

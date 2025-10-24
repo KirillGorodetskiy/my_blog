@@ -4,7 +4,7 @@ from blog import views
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name='admin'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', views.PostListView.as_view(), name='home'),
     path(

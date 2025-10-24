@@ -24,3 +24,4 @@ def trim(value):
         return value.strip()
     return value
 
+

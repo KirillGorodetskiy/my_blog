@@ -559,7 +559,7 @@
     <h3 class="empty-state-title">No projects yet</h3>
     <p class="empty-state-text">Start building something amazing!</p>
     {% if user.is_authenticated and user.is_superuser %}
-      <a href="{% url 'add_project' %}" class="btn-add-project">Create Your First Project</a>
+      <a href="{% url 'project_add' %}" class="btn-add-project">Create Your First Project</a>
     {% endif %}
   </div>
   {% endif %}

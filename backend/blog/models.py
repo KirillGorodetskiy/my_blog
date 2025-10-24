@@ -46,7 +46,7 @@ class Project(models.Model):
     live_link = models.URLField(max_length=200, blank=True, null=True)
     github_link = models.URLField(max_length=200, blank=True, null=True)
     added_at = models.DateTimeField(auto_now_add=True)
-    icon = models.CharField(max_length=10, default="📁")
+    icon = models.CharField(max_length=10, default="📁", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
