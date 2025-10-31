@@ -77,7 +77,7 @@ class Post(models.Model):
     body = models.TextField()
     project = models.ForeignKey(
         Project,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         null=True,
         blank=True,
         related_name='posts'

@@ -1,6 +1,7 @@
 from django import forms
 from .models import Post, Project
 
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
@@ -10,15 +11,32 @@ class PostForm(forms.ModelForm):
             'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
         }
 
+
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['title', 'description', 'technologies', 'icon', 'live_link', 'github_link']
+        fields = [
+            'title',
+            'description',
+            'technologies',
+            'icon',
+            'live_link',
+            'github_link'
+        ]
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
-            'technologies': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., Python, Django, PostgreSQL'}),
-            'icon': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g., 🚀 or 💻'}),
+            'description': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 6}
+            ),
+            'technologies': forms.TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'e.g., Python, Django, PostgreSQL'
+                }
+            ),
+            'icon': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'e.g., 🚀 or 💻'}
+            ),
             'live_link': forms.TextInput(attrs={'class': 'form-control'}),
             'github_link': forms.TextInput(attrs={'class': 'form-control'}),
         }
