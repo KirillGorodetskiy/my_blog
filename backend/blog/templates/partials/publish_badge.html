@@ -1,0 +1,5 @@
+{% if request.user.is_superuser %}
+  <span class="badge {{ obj.publish_badge_class }}">
+    {{ obj.publish_label }}
+  </span>
+{% endif %}
