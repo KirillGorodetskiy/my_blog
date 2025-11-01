@@ -5,10 +5,16 @@ from .models import Post, Project
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'body']
+        fields = ['title', 'body', 'is_published']
+        labels = {
+            "is_published": "Publish this post",
+        }
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'body': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'is_published': forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
+            )
         }
 
 
@@ -21,12 +27,19 @@ class ProjectForm(forms.ModelForm):
             'technologies',
             'icon',
             'live_link',
-            'github_link'
+            'github_link',
+            'is_published'
         ]
+        labels = {
+            "is_published": "Publish this project",
+        }
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(
                 attrs={'class': 'form-control', 'rows': 6}
+            ),
+            'is_published': forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
             ),
             'technologies': forms.TextInput(
                 attrs={

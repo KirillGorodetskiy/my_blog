@@ -216,12 +216,14 @@
                 <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
               </svg>
               {{ post.created_at|date:"g:i A" }}
+              {% include "partials/publish_badge.html" with obj=post %}
             </div>
           </div>
         </div>
 
         <!-- Post Body -->
-        <article class="post-body">{{ post.body }}</article>
+        {% load markdown_extras %}
+        <article class="post-body">{{ post.body | render_markdown }}</article>
 
         {% if user.is_authenticated and user.is_superuser %}
         <!-- Action Buttons -->

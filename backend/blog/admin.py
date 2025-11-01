@@ -9,4 +9,4 @@ class PostAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'added_at')  
+    list_display = ('id', 'title', 'created_at')  

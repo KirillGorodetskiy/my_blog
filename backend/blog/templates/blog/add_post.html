@@ -150,7 +150,16 @@
       color: #667eea;
       transform: translateX(-5px);
     }
-    
+
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: flex-start;
+      padding-left: 0;
+      margin-left: 0;
+    }
+        
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -201,7 +210,7 @@
         <form method="post">
         {% csrf_token %}
 
-          <div class="mb-4">
+        <div class="mb-4">
             <label class="form-label">{{ form.title.label }}</label>
           {{ form.title }}
             {% if form.title.errors %}
@@ -209,12 +218,21 @@
             {% endif %}
         </div>
 
-          <div class="mb-4">
+        <div class="mb-4">
             <label class="form-label">{{ form.body.label }}</label>
           {{ form.body }}
             {% if form.body.errors %}
               <div class="text-danger mt-2">{{ form.body.errors }}</div>
             {% endif %}
+        </div>
+
+        <div class="mb-4">
+          {{ form.is_published.label_tag }}
+          {{ form.is_published }}
+          {% if form.is_published.errors %}
+            <div class="text-danger mt-2">{{ form.is_published.errors }}</div>
+          {% endif %}
+          <div class="form-hint">If checked, it will be visible for all</div>
         </div>
 
           <div class="form-buttons">

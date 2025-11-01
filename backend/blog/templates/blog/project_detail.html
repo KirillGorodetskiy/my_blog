@@ -476,6 +476,7 @@
               <path d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
             </svg>
             Created {{ object.created_at|date:"F d, Y" }}
+            {% include "partials/publish_badge.html" with obj=project %}
           </div>
           {% if object.live_link or object.github_link %}
           <div class="meta-item">
@@ -501,7 +502,9 @@
         </svg>
         About This Project
       </h2>
-      <p class="project-description-full">{{ object.description }}</p>
+      
+      {% load markdown_extras %}
+      <p class="project-description-full">{{ object.description | render_markdown }}</p>
     </div>
 
     <!-- Technologies Section -->
@@ -581,7 +584,7 @@
           Delete Project
         </a>
       </div>
-    </div>
+     </div>
     {% endif %}
 
     <!-- Related Posts Section -->

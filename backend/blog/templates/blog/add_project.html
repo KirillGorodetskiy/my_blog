@@ -280,6 +280,17 @@
             {% if form.github_link.errors %}
               <div class="text-danger mt-2">{{ form.github_link.errors }}</div>
             {% endif %}
+
+          <div class="mb-4">
+            <br>
+            {{ form.is_published.label_tag }}
+            {{ form.is_published }}
+            {% if form.is_published.errors %}
+              <div class="text-danger mt-2">{{ form.is_published.errors }}</div>
+            {% endif %}
+            <div class="form-hint">If checked would be visible for all</div>
+          </div>
+
         </div>
 
           <div class="form-buttons">

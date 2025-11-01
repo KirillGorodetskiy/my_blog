@@ -9,7 +9,19 @@ from .models import Post, Project
 from .forms import PostForm, ProjectForm
 
 
-class SuperUserOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
+class PublishedOnlyUnlessSuperuserMixin:
+    '''We don`t want to show unpublished material to users'''
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.request.user.is_superuser:
+            return qs
+        return qs.filter(is_published=True)
+
+
+class SuperUserOnlyMixin(
+    LoginRequiredMixin,
+    UserPassesTestMixin
+):
     '''Allow access to unsafe methods to superuser only'''
     raise_exception = True  # raise 403 Error
 
@@ -17,13 +29,20 @@ class SuperUserOnlyMixin(LoginRequiredMixin, UserPassesTestMixin):
         return self.request.user.is_superuser
 
 
-class PostListView(ListView):
+class PostListView(
+    PublishedOnlyUnlessSuperuserMixin,
+    ListView
+):
     model = Post
+    ordering = 'created_at'
     template_name = 'blog/index.html'
     paginate_by = settings.POST_COUNT_ON_PAGE
 
 
-class PostDetailView(DetailView):
+class PostDetailView(
+    PublishedOnlyUnlessSuperuserMixin,
+    DetailView
+):
     model = Post
 
 
@@ -67,13 +86,19 @@ class PostDeleteView(SuperUserOnlyMixin, DeleteView):
         return context
 
 
-class ProjectsListView(ListView):
+class ProjectsListView(
+    PublishedOnlyUnlessSuperuserMixin,
+    ListView
+):
     model = Project
-    ordering = 'id'
+    ordering = 'created_at'
     paginate_by = settings.PROJECT_COUNT_ON_PAGE
 
 
-class ProjectDetailView(DetailView):
+class ProjectDetailView(
+    PublishedOnlyUnlessSuperuserMixin,
+    DetailView
+):
     model = Project
 
 

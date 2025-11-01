@@ -38,16 +38,36 @@ def get_unique_slug(
     return slug
 
 
-class Project(models.Model):
+class ProjectPostBase(models.Model):
+    '''base model to support DRY approach'''
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
+    is_published = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    published_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        # we don`t need table for this class
+        abstract = True
+        ordering = ['-created_at']
+
+    @property
+    def publish_label(self):
+        '''we use the property in template to mark published projects'''
+        return 'Published' if self.is_published else 'Unpublished'
+
+    @property
+    def publish_badge_class(self):
+        return 'bg-success' if self.is_published else 'bg-secondary'
+
+
+class Project(ProjectPostBase):
     description = models.TextField()
     technologies = models.CharField(max_length=200, blank=True, null=True)
     live_link = models.URLField(max_length=200, blank=True, null=True)
     github_link = models.URLField(max_length=200, blank=True, null=True)
-    added_at = models.DateTimeField(auto_now_add=True)
     icon = models.CharField(max_length=10, default="📁", blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -71,22 +91,20 @@ class Tag(models.Model):
         super().save(*args, **kwargs)
 
 
-class Post(models.Model):
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
+class Post(ProjectPostBase):
     body = models.TextField()
     project = models.ForeignKey(
         Project,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='posts'
     )
-    tag = models.ManyToManyField(Tag, blank=True, related_name='posts')
-    created_at = models.DateTimeField(auto_now_add=True)
-    published_at = models.DateTimeField(blank=True, null=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_published = models.BooleanField(default=False)
+    tag = models.ManyToManyField(
+        Tag,
+        blank=True,
+        related_name='posts'
+    )
 
     class Meta:
         ordering = ['-created_at']

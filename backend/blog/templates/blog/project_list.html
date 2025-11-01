@@ -485,9 +485,9 @@
         {% if project.icon %}
           <span class="project-icon">{{ project.icon }}</span>
         {% endif %}
+        {% load markdown_extras %}
         <h3 class="project-title">{{ project.title }}</h3>
-        <p class="project-description">{{ project.description|truncatechars:120 }}</p>
-        
+        <p class="project-description">{{ project.description|truncatechars:120|render_markdown }}</p>
         {% if project.technologies %}
         <div class="project-tech">
           {% for tech in project.technologies|split:',' %}
@@ -512,6 +512,7 @@
               <span class="link-indicator" style="background: #2d3748;" title="GitHub Available"></span>
             {% endif %}
           </div>
+          {% include "partials/publish_badge.html" with obj=project %}
         </div>
         
         <div class="view-details-btn">
