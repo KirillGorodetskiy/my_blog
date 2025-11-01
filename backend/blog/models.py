@@ -3,6 +3,7 @@ from typing import Type, TypeVar
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.text import slugify
+from django.utils import timezone
 
 
 User = get_user_model()
@@ -61,6 +62,15 @@ class ProjectPostBase(models.Model):
     def publish_badge_class(self):
         return 'bg-success' if self.is_published else 'bg-secondary'
 
+    def save(self, *args, **kwargs):
+        # Auto-set published_at
+        # we don`t update this field since
+        # we have 'updated_at' field
+        if self.is_published and not self.published_at:
+            self.published_at = timezone.now()
+
+        super().save(*args, **kwargs)
+
 
 class Project(ProjectPostBase):
     description = models.TextField()
@@ -89,6 +99,9 @@ class Tag(models.Model):
         if not self.slug:
             self.slug = get_unique_slug(self, Tag, 'name')
         super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Post(ProjectPostBase):

@@ -34,7 +34,7 @@ class PostListView(
     ListView
 ):
     model = Post
-    ordering = 'created_at'
+    ordering = '-published_at'
     template_name = 'blog/index.html'
     paginate_by = settings.POST_COUNT_ON_PAGE
 
@@ -76,7 +76,7 @@ class PostCreateView(SuperUserOnlyMixin, CreateView):
 
 class PostDeleteView(SuperUserOnlyMixin, DeleteView):
     model = Post
-    template_name = 'confirm_delete.html'
+    template_name = 'blog/confirm_delete.html'
     success_url = reverse_lazy('home')
 
     def get_context_data(self, **kwargs):
@@ -91,7 +91,7 @@ class ProjectsListView(
     ListView
 ):
     model = Project
-    ordering = 'created_at'
+    ordering = '-published_at'
     paginate_by = settings.PROJECT_COUNT_ON_PAGE
 
 
@@ -132,7 +132,7 @@ class ProjectUpdateView(SuperUserOnlyMixin, UpdateView):
 
 class ProjectDeleteView(SuperUserOnlyMixin, DeleteView):
     model = Project
-    template_name = 'confirm_delete.html'
+    template_name = 'blog/confirm_delete.html'
     success_url = reverse_lazy('projects')
 
     def get_context_data(self, **kwargs):
