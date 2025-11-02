@@ -24,7 +24,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-collection" viewBox="0 0 16 16" style="display: inline; margin-right: 0.5rem;">
         <path d="M2.5 3.5a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-11zm2-2a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1h-7zM0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zm1.5.5A.5.5 0 0 1 1 13V6a.5.5 0 0 1 .5-.5h13a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-13z"/>
       </svg>
-      {{ page_obj.paginator.count }} Project{{ page_obj.paginator.count|pluralize }}
+      {{ page_obj.paginator.count }} Project {{ page_obj.paginator.count|pluralize }}
     </div>
     {% if user.is_authenticated and user.is_superuser %}
     <a href="{% url 'project_add' %}" class="btn-add-project">
@@ -45,7 +45,7 @@
           <span class="project-icon">{{ project.icon }}</span>
         {% endif %}
         <h3 class="project-title">{{ project.title }}</h3>
-        <p class="project-description">{{ project.description|truncatechars:120|render_markdown }}</p>
+        <p class="markdown-body">{{ project.description|truncatechars:120|render_markdown }}</p>
         {% if project.technologies %}
         <div class="project-tech">
           {% for tech in project.technologies|split:',' %}

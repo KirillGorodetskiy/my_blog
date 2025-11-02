@@ -55,7 +55,7 @@
         </div>
 
         <!-- Post Body -->
-        <article class="post-body">{{ post.body|render_markdown }}</article>
+        <article class="markdown-body">{{ post.body|render_markdown }}</article>
 
         {% if user.is_authenticated and user.is_superuser %}
         <!-- Action Buttons -->

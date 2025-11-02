@@ -10,8 +10,9 @@ register = template.Library()
 @stringfilter
 def render_markdown(value):
     # convert Markdown to HTML
+    extensions = ['fenced_code', 'tables', 'codehilite', 'toc', 'smarty']
     html = markdown.markdown(
         value,
-        extensions=["fenced_code", "tables"]
+        extensions=extensions
     )
     return mark_safe(html)
