@@ -23,14 +23,15 @@ cd my_blog
 python3 -m venv venv
 source venv/bin/activate   # on Windows: venv\Scripts\activate
 pip install -r requirements.txt 
-'''
+```
 
 Then open http://127.0.0.1:8000/ in your browser.
 
-##Usage
+## Usage
 
 Place your HTML templates in the templates/ folder of your app or project.
 Put your CSS/JS/images in the static/ directory.
 Define your views in views.py and map them in urls.py.
 To add a new page: create a template + view + URL entry.
+
 
