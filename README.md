@@ -87,6 +87,8 @@ backend or frontend code changes:
 docker compose up -d --build
 ```
 
+Compose interpolates `${VAR}` from the process
+environment. Locally that is the project `.env` file.
 `docker compose restart` does not reload `.env`.
 
 Compose ports:
@@ -217,6 +219,153 @@ proxy_set_header X-Real-IP $remote_addr;
 proxy_set_header X-Forwarded-For $remote_addr;
 proxy_set_header X-Forwarded-Proto $scheme;
 ```
+
+## Production deployment
+
+GitHub Actions runs CI on `master`, then SSHes to the VPS
+and runs `/opt/stacks/my_blog/deploy.sh`. Doppler on the
+VPS injects `my-blog` / `prd` into Docker Compose.
+Host Nginx is not reloaded by application deploys.
+
+```text
+push/merge to master
+  → backend + frontend CI
+  → SSH
+  → deploy.sh
+  → git reset --hard origin/master
+  → doppler run -- docker compose up -d --build
+  → health checks
+```
+
+Migrations run **once** in
+`backend/docker/entrypoint.sh` when the backend
+container starts. The deploy script does not run
+`migrate` again. A failed migrate exits the container
+and fails health verification. Take a PostgreSQL backup
+before the first production deploy of new migrations.
+
+Do not run `docker compose down` or `docker compose down
+-v` during ordinary deploys.
+
+### One-time VPS setup
+
+```bash
+# 1. Clone to the production path (public HTTPS clone).
+sudo mkdir -p /opt/stacks/my_blog
+sudo chown "$USER":"$USER" /opt/stacks/my_blog
+git clone https://github.com/KirillGorodetskiy/my_blog.git \
+  /opt/stacks/my_blog
+cd /opt/stacks/my_blog
+git checkout master
+
+# If the GitHub repo is private, do not reuse the
+# GitHub Actions SSH key. Create a separate VPS deploy
+# key, add it as a GitHub Deploy Key (read-only), and
+# clone with git@github.com:KirillGorodetskiy/my_blog.git
+
+# 2. Install Docker Engine and Compose.
+# 3. Allow the deploy user to run docker (no 777).
+sudo usermod -aG docker "$USER"
+
+# 4. Install Doppler CLI, then authenticate on the VPS
+#    only. A Doppler service token for my-blog/prd is
+#    the unattended option:
+#      doppler configure set token --token '<token>' \
+#        --scope /opt/stacks/my_blog
+#    Do not put that token in GitHub or this repo.
+doppler setup --project my-blog --config prd
+
+# 5. Media directory. Docker writes uploads here.
+#    Host Nginx reads them. Typical mode is 755.
+mkdir -p /opt/stacks/my_blog/media
+
+# 6. Install the deploy entrypoint.
+install -m 750 deploy/deploy.sh /opt/stacks/my_blog/deploy.sh
+
+# 7. Configure host Nginx from
+#    deploy/nginx-gkablog.conf.example
+#    frontend 127.0.0.1:3000, backend 127.0.0.1:8000,
+#    /media/ aliased to /opt/stacks/my_blog/media/
+```
+
+Doppler `prd` must include the production values
+documented above, especially:
+
+```text
+DJANGO_DEBUG=0
+DJANGO_BEHIND_PROXY=1
+DJANGO_SECURE_COOKIES=1
+DJANGO_SERVE_MEDIA=0
+TURNSTILE_SKIP_VERIFY=0
+MEDIA_HOST_PATH=/opt/stacks/my_blog/media
+```
+
+plus Django/Postgres/Turnstile secrets. Compose reads
+those from the `doppler run` environment. There is no
+production `.env` file.
+
+### One-time GitHub setup
+
+Create a GitHub Environment named `production` with
+these secrets only:
+
+```text
+VPS_HOST
+VPS_USER
+VPS_SSH_PRIVATE_KEY
+VPS_SSH_PORT
+```
+
+`VPS_SSH_PORT` may be `22`. Application secrets do not
+belong here.
+
+Recreate the Actions → VPS key locally (do not commit):
+
+```bash
+ssh-keygen -t ed25519 -C "github-actions-my-blog" \
+  -f github-actions-my-blog
+```
+
+```text
+github-actions-my-blog
+    private key
+    → GitHub Environment secret VPS_SSH_PRIVATE_KEY
+    Must be usable non-interactively (no passphrase,
+    or an agent the runner cannot use).
+
+github-actions-my-blog.pub
+    public key
+    → deploy user's ~/.ssh/authorized_keys on the VPS
+```
+
+On the VPS, as the deploy user:
+
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+# paste the public key, one line
+cat >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+This key is only for GitHub Actions → VPS SSH. Keep
+VPS → GitHub repository credentials separate.
+
+### Normal deployment
+
+Merge or push to `master`, or run the **Deploy**
+workflow manually on `master`. CI must pass before SSH
+deploy.
+
+### Deploy script path
+
+```text
+repo:   deploy/deploy.sh
+VPS:    /opt/stacks/my_blog/deploy.sh
+```
+
+The VPS script updates git, then execs
+`deploy/deploy.sh --apply` from the checked-out commit.
 
 ## Markdown images
 

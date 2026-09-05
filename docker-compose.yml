@@ -1,3 +1,9 @@
+# Compose interpolates ${VAR} from the process environment.
+# Locally that is the project `.env` file. On the VPS,
+# `doppler run` injects my-blog/prd. Do not commit secrets.
+# There is no `env_file: .env`, so production does not need
+# a plaintext dotenv file.
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -23,10 +29,27 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    env_file: .env
     environment:
       DB_HOST: postgres
       DUMP_DIR: /dumps
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT:-5432}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+      DJANGO_SERVE_MEDIA: ${DJANGO_SERVE_MEDIA:-0}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      DJANGO_BEHIND_PROXY: ${DJANGO_BEHIND_PROXY:-0}
+      DJANGO_SECURE_COOKIES: ${DJANGO_SECURE_COOKIES:-0}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      TURNSTILE_SKIP_VERIFY: ${TURNSTILE_SKIP_VERIFY:-0}
+      COMMENT_RATE_PER_MINUTE: ${COMMENT_RATE_PER_MINUTE:-3}
+      COMMENT_RATE_PER_10_MINUTES: ${COMMENT_RATE_PER_10_MINUTES:-10}
+      COMMENT_RATE_PER_DAY: ${COMMENT_RATE_PER_DAY:-30}
+      LOAD_DJANGO_FIXTURES: ${LOAD_DJANGO_FIXTURES:-0}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS:-3}
     volumes:
       - ./db/dumps:/dumps:ro
       - ${MEDIA_HOST_PATH:-./backend/media}:/app/backend/media
