@@ -34,8 +34,12 @@ const nextConfig: NextConfig = {
         destination: `${djangoOrigin}/admin/`,
       },
       {
+        source: '/admin/:path*/',
+        destination: `${djangoOrigin}/admin/:path*/`,
+      },
+      {
         source: '/admin/:path*',
-        destination: `${djangoOrigin}/admin/:path*`,
+        destination: `${djangoOrigin}/admin/:path*/`,
       },
       {
         source: '/static/:path*',

@@ -64,6 +64,18 @@ def test_unpublished_article_detail_is_hidden(api):
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
+def test_article_category_uses_admin_managed_name(api):
+    post = PostFactory.create(
+        title='Custom aisle',
+        is_published=True,
+        category='Hardware',
+        excerpt='New category',
+    )
+    response = api.get(f'/api/v1/articles/{post.slug}/')
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()['category'] == 'Hardware'
+
+
 def test_article_serializer_maps_tags(api):
     tag = TagFactory.create(name='django')
     post = PostFactory.create(

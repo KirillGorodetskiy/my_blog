@@ -44,6 +44,7 @@ from blog.api.serializers import (
 def published_posts() -> QuerySet[Post]:
     return (
         Post.objects.filter(is_published=True)
+        .select_related('category')
         .prefetch_related('tag')
     )
 
@@ -63,7 +64,11 @@ class ArticleListView(APIView):
         featured = request.query_params.get('featured')
         if featured in {'1', 'true', 'True'}:
             queryset = queryset.filter(featured=True)
-        serializer = ArticleSerializer(queryset, many=True)
+        serializer = ArticleSerializer(
+            queryset,
+            many=True,
+            context={'request': request},
+        )
         return Response(serializer.data)
 
 
@@ -72,7 +77,12 @@ class ArticleDetailView(APIView):
 
     def get(self, request, slug: str):
         article = get_object_or_404(published_posts(), slug=slug)
-        return Response(ArticleSerializer(article).data)
+        return Response(
+            ArticleSerializer(
+                article,
+                context={'request': request},
+            ).data,
+        )
 
 
 class ProjectListView(APIView):
@@ -83,7 +93,11 @@ class ProjectListView(APIView):
         featured = request.query_params.get('featured')
         if featured in {'1', 'true', 'True'}:
             queryset = queryset.filter(featured=True)
-        serializer = ProjectSerializer(queryset, many=True)
+        serializer = ProjectSerializer(
+            queryset,
+            many=True,
+            context={'request': request},
+        )
         return Response(serializer.data)
 
 
@@ -95,7 +109,12 @@ class ProjectDetailView(APIView):
             published_projects(),
             slug=slug,
         )
-        return Response(ProjectSerializer(project).data)
+        return Response(
+            ProjectSerializer(
+                project,
+                context={'request': request},
+            ).data,
+        )
 
 
 class SearchView(APIView):
@@ -109,7 +128,7 @@ class SearchView(APIView):
             Q(title__icontains=query)
             | Q(excerpt__icontains=query)
             | Q(body__icontains=query)
-            | Q(category__icontains=query)
+            | Q(category__name__icontains=query)
             | Q(tag__name__icontains=query)
         ).distinct()
         projects = published_projects().filter(

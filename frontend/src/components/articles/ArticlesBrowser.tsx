@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ARTICLE_CATEGORIES } from '@/data/types';
 import type { Article } from '@/data/types';
 import {
   categoryToParam,
@@ -24,13 +23,17 @@ export function ArticlesBrowser({
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const options = useMemo<ArticleFilterValue[]>(
-    () => ['All', ...usedCategories(articles, ARTICLE_CATEGORIES)],
+  const categories = useMemo(
+    () => usedCategories(articles),
     [articles],
+  );
+  const options = useMemo<ArticleFilterValue[]>(
+    () => ['All', ...categories],
+    [categories],
   );
   const active = paramToCategory(
     params.get('tag'),
-    ARTICLE_CATEGORIES,
+    categories,
   );
   const visible = useMemo(
     () => filterByCategory(articles, active),

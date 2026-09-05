@@ -1,6 +1,4 @@
-import type { ArticleCategory } from '@/data/types';
-
-export type ArticleFilterValue = 'All' | ArticleCategory;
+export type ArticleFilterValue = 'All' | string;
 
 interface ArticleFiltersProps {
   active: ArticleFilterValue;

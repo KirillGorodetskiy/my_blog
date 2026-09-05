@@ -12,13 +12,34 @@ User = get_user_model()
 M = TypeVar('M', bound=models.Model)
 
 
-class ArticleCategory(models.TextChoices):
-    AI = 'AI', 'AI'
-    AUTOMATION = 'Automation', 'Automation'
-    DEVELOPMENT = 'Development', 'Development'
-    PRODUCTIVITY = 'Productivity', 'Productivity'
-    LIFE = 'Life', 'Life'
-    TRAVEL = 'Travel', 'Travel'
+class PostCategory(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=60, unique=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'article category'
+        verbose_name_plural = 'article categories'
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = get_unique_slug(
+                self,
+                PostCategory,
+                'name',
+            )
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return self.name
+
+
+def default_post_category_pk() -> int:
+    category, _ = PostCategory.objects.get_or_create(
+        name='Development',
+        defaults={'slug': 'development'},
+    )
+    return category.pk
 
 
 class ProjectCategory(models.TextChoices):
@@ -183,10 +204,11 @@ class Post(ProjectPostBase):
         blank=True,
         related_name='posts'
     )
-    category = models.CharField(
-        max_length=32,
-        choices=ArticleCategory.choices,
-        default=ArticleCategory.DEVELOPMENT,
+    category = models.ForeignKey(
+        PostCategory,
+        on_delete=models.PROTECT,
+        related_name='posts',
+        default=default_post_category_pk,
     )
     excerpt = models.TextField(blank=True)
     image = models.ImageField(

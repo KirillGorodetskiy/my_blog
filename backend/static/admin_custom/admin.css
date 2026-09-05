@@ -1,0 +1,124 @@
+:root,
+html[data-theme="light"],
+html[data-theme="dark"],
+html[data-theme="auto"] {
+  --primary: #61e6b3;
+  --secondary: #091112;
+  --accent: #61e6b3;
+  --primary-fg: #05090a;
+  --body-fg: #edf3ef;
+  --body-bg: #05090a;
+  --body-quiet-color: #91a09a;
+  --body-medium-color: #c3d0ca;
+  --body-loud-color: #edf3ef;
+  --header-color: #edf3ef;
+  --header-branding-color: #61e6b3;
+  --header-bg: #091112;
+  --header-link-color: #edf3ef;
+  --breadcrumbs-fg: #91a09a;
+  --breadcrumbs-link-fg: #61e6b3;
+  --breadcrumbs-bg: #0d1718;
+  --link-fg: #61e6b3;
+  --link-hover-color: #edf3ef;
+  --link-selected-fg: #61e6b3;
+  --hairline-color: #183032;
+  --border-color: #183032;
+  --error-fg: #e35f5f;
+  --message-success-bg: #173d33;
+  --message-warning-bg: #3d3417;
+  --message-error-bg: #3d1717;
+  --darkened-bg: #091112;
+  --selected-bg: #0d1718;
+  --selected-row: #173d33;
+  --button-fg: #05090a;
+  --button-bg: #61e6b3;
+  --button-hover-bg: #4dcc9c;
+  --default-button-bg: #61e6b3;
+  --default-button-hover-bg: #4dcc9c;
+  --close-button-bg: #183032;
+  --close-button-hover-bg: #245055;
+  --delete-button-bg: #ba2121;
+  --delete-button-hover-bg: #a41515;
+  --object-tools-fg: #05090a;
+  --object-tools-bg: #61e6b3;
+  --object-tools-hover-bg: #4dcc9c;
+  --font-family-primary: "Outfit", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+#header {
+  border-bottom: 1px solid #183032;
+}
+
+#branding h1,
+#site-name a {
+  font-family: "Newsreader", Georgia, serif;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+#content-related .module,
+#content .module,
+.login .form-row,
+#changelist .results,
+.aligned .form-row {
+  border-radius: 12px;
+}
+
+.module {
+  background: #091112;
+  border: 1px solid #183032;
+  border-radius: 12px;
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+  background: #0d1718;
+  color: #edf3ef;
+  border-radius: 12px 12px 0 0;
+}
+
+#nav-sidebar {
+  background: #091112;
+  border-right: 1px solid #183032;
+}
+
+#nav-filter {
+  background: #0d1718;
+  border: 1px solid #183032;
+  color: #edf3ef;
+  border-radius: 999px;
+}
+
+#changelist-filter {
+  background: #091112;
+  border-radius: 12px;
+}
+
+input, textarea, select {
+  background: #0d1718;
+  color: #edf3ef;
+  border: 1px solid #183032;
+  border-radius: 8px;
+}
+
+.button, input[type="submit"], input[type="button"],
+.submit-row input, a.button {
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.login {
+  background: #05090a;
+}
+
+.login #container {
+  background: #091112;
+  border: 1px solid #183032;
+  border-radius: 16px;
+}
+
+.theme-toggle {
+  display: none;
+}

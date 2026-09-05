@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.urls import reverse
 from rest_framework import serializers
 
 from blog.models import (
@@ -38,8 +39,20 @@ def split_lines(value: str) -> list[str]:
     ]
 
 
+def staff_change_url(serializer, viewname: str, pk: int):
+    request = serializer.context.get('request')
+    user = getattr(request, 'user', None)
+    if (
+        user is None
+        or not user.is_authenticated
+        or not user.is_staff
+    ):
+        return None
+    return reverse(viewname, args=[pk])
+
+
 class ArticleSerializer(serializers.ModelSerializer):
-    category = serializers.CharField()
+    category = serializers.CharField(source='category.name')
     date = serializers.SerializerMethodField()
     readTimeMinutes = serializers.SerializerMethodField()
     excerpt = serializers.CharField()
@@ -47,6 +60,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     featured = serializers.BooleanField()
     tags = serializers.SerializerMethodField()
     body = serializers.CharField()
+    adminUrl = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -61,6 +75,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             'featured',
             'tags',
             'body',
+            'adminUrl',
         )
 
     def get_date(self, obj: Post) -> str:
@@ -75,6 +90,13 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     def get_tags(self, obj: Post) -> list[str]:
         return list(obj.tag.values_list('name', flat=True))
+
+    def get_adminUrl(self, obj: Post) -> str | None:
+        return staff_change_url(
+            self,
+            'admin:blog_post_change',
+            obj.pk,
+        )
 
 
 class ScreenshotSerializer(serializers.ModelSerializer):
@@ -107,6 +129,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     lessons = serializers.SerializerMethodField()
     githubUrl = serializers.SerializerMethodField()
     demoUrl = serializers.SerializerMethodField()
+    adminUrl = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -129,6 +152,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             'lessons',
             'githubUrl',
             'demoUrl',
+            'adminUrl',
         )
 
     def get_image(self, obj: Project) -> str:
@@ -146,9 +170,17 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_demoUrl(self, obj: Project) -> str | None:
         return obj.live_link or None
 
+    def get_adminUrl(self, obj: Project) -> str | None:
+        return staff_change_url(
+            self,
+            'admin:blog_project_change',
+            obj.pk,
+        )
+
 
 class SearchArticleSerializer(serializers.ModelSerializer):
     excerpt = serializers.CharField()
+    category = serializers.CharField(source='category.name')
     tags = serializers.SerializerMethodField()
 
     class Meta:

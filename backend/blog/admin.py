@@ -1,9 +1,15 @@
 from django.contrib import admin
 
+from blog.branding import (
+    ADMIN_INDEX_TITLE,
+    ADMIN_SITE_HEADER,
+    ADMIN_SITE_TITLE,
+)
 from blog.models import (
     Comment,
     ModerationTerm,
     Post,
+    PostCategory,
     Project,
     ProjectScreenshot,
     Tag,
@@ -19,15 +25,17 @@ class ProjectScreenshotInline(admin.TabularInline):
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
         'title',
+        'slug',
         'category',
         'featured',
         'project',
         'is_published',
         'published_at',
         'created_at',
+        'updated_at',
     )
+    list_display_links = ('title',)
     list_filter = (
         'is_published',
         'featured',
@@ -35,7 +43,14 @@ class PostAdmin(admin.ModelAdmin):
         'created_at',
         'project',
     )
-    search_fields = ('title', 'excerpt', 'body', 'project__title')
+    search_fields = (
+        'title',
+        'slug',
+        'excerpt',
+        'body',
+        'category__name',
+        'project__title',
+    )
     ordering = ('-created_at',)
     date_hierarchy = 'created_at'
     fieldsets = (
@@ -70,21 +85,30 @@ class PostAdmin(admin.ModelAdmin):
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
         'title',
+        'slug',
         'category',
         'status',
         'featured',
         'is_published',
         'published_at',
+        'created_at',
+        'updated_at',
     )
+    list_display_links = ('title',)
     list_filter = (
         'is_published',
         'featured',
         'category',
         'status',
     )
-    search_fields = ('title', 'description', 'technologies')
+    search_fields = (
+        'title',
+        'slug',
+        'description',
+        'technologies',
+    )
+    ordering = ('-created_at',)
     date_hierarchy = 'created_at'
     inlines = [ProjectScreenshotInline]
     fieldsets = (
@@ -132,6 +156,14 @@ class ProjectAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
 
 
+@admin.register(PostCategory)
+class PostCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    search_fields = ('name',)
+    prepopulated_fields = {'slug': ('name',)}
+    ordering = ('name',)
+
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'slug')
@@ -163,7 +195,6 @@ def mark_spam_comments(modeladmin, request, queryset):
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
         'author',
         'status',
         'post',
@@ -171,8 +202,15 @@ class CommentAdmin(admin.ModelAdmin):
         'created_at',
         'moderation_reason',
     )
-    list_filter = ('status', 'author', 'created_at')
-    search_fields = ('body', 'author__username')
+    list_display_links = ('author',)
+    list_filter = ('status', 'created_at')
+    search_fields = (
+        'body',
+        'author__username',
+        'post__title',
+        'project__title',
+    )
+    list_select_related = ('author', 'post', 'project')
     date_hierarchy = 'created_at'
     actions = (
         approve_comments,
@@ -187,3 +225,8 @@ class ModerationTermAdmin(admin.ModelAdmin):
     list_display = ('term', 'is_active', 'action')
     list_filter = ('is_active', 'action')
     search_fields = ('term',)
+
+
+admin.site.site_header = ADMIN_SITE_HEADER
+admin.site.site_title = ADMIN_SITE_TITLE
+admin.site.index_title = ADMIN_INDEX_TITLE

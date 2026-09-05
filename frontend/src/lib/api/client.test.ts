@@ -9,6 +9,18 @@ describe('nextConfig', () => {
   it('keeps API trailing slashes for Django', () => {
     expect(nextConfig.skipTrailingSlashRedirect).toBe(true);
   });
+
+  it('forwards Django admin paths with a trailing slash', async () => {
+    const rules = await nextConfig.rewrites();
+    const list = Array.isArray(rules) ? rules : [];
+    const adminRules = list.filter((rule) =>
+      rule.source.startsWith('/admin'),
+    );
+    expect(adminRules.length).toBeGreaterThan(0);
+    for (const rule of adminRules) {
+      expect(rule.destination.endsWith('/')).toBe(true);
+    }
+  });
 });
 
 describe('auth and content contracts', () => {

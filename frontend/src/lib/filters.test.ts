@@ -46,6 +46,14 @@ describe('usedCategories', () => {
       usedCategories(items, ['AI', 'Life', 'Hardware']),
     ).toEqual(['AI', 'Life']);
   });
+
+  it('derives sorted categories from content', () => {
+    expect(usedCategories(items)).toEqual([
+      'AI',
+      'Life',
+      'Travel',
+    ]);
+  });
 });
 
 describe('category query params', () => {

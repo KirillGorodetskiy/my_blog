@@ -7,7 +7,7 @@ export const ARTICLE_CATEGORIES = [
   'Travel',
 ] as const;
 
-export type ArticleCategory = (typeof ARTICLE_CATEGORIES)[number];
+export type ArticleCategory = string;
 
 export interface Article {
   slug: string;
@@ -20,6 +20,7 @@ export interface Article {
   featured: boolean;
   tags: string[];
   body: string;
+  adminUrl?: string | null;
 }
 
 export const PROJECT_CATEGORIES = [
@@ -64,6 +65,7 @@ export interface Project {
   lessons: string[];
   githubUrl: string | null;
   demoUrl: string | null;
+  adminUrl?: string | null;
 }
 
 export const UNWRITTEN =
