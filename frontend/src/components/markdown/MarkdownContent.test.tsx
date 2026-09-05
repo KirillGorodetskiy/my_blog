@@ -13,6 +13,34 @@ describe('MarkdownContent', () => {
     expect(screen.getByText('deleted').tagName).toBe('DEL');
   });
 
+  it('keeps list markup as ul and ol items', () => {
+    const { container } = render(
+      <MarkdownContent
+        source={[
+          '### Features',
+          '',
+          '- first',
+          '- second',
+          '',
+          '1. alpha',
+          '2. beta',
+        ].join('\n')}
+      />,
+    );
+
+    expect(container.querySelector('ul.article-list')).not.toBeNull();
+    expect(container.querySelector('ol.article-list')).not.toBeNull();
+    expect(
+      container.querySelectorAll('ul.article-list > li'),
+    ).toHaveLength(2);
+    expect(
+      container.querySelectorAll('ol.article-list > li'),
+    ).toHaveLength(2);
+    expect(
+      screen.getByRole('heading', { name: /Features/ }).tagName,
+    ).toBe('H3');
+  });
+
   it('renders lists, links, and fenced code', () => {
     render(
       <MarkdownContent
@@ -89,6 +117,20 @@ describe('MarkdownContent', () => {
     ).toBeInTheDocument();
     expect(container.textContent).toContain('Reliable delivery');
     expect(container.textContent).not.toContain('✅');
+  });
+
+  it('maps the educational marker to a site icon', () => {
+    const { container } = render(
+      <MarkdownContent source='🧠 Educational example' />,
+    );
+
+    expect(
+      container.querySelector('[data-icon="education"]'),
+    ).toBeInTheDocument();
+    expect(container.textContent).toContain(
+      'Educational example',
+    );
+    expect(container.textContent).not.toContain('🧠');
   });
 
   it('leaves unrelated emoji unchanged', () => {

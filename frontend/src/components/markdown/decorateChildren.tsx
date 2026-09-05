@@ -1,9 +1,12 @@
 import { Children, type ReactNode } from 'react';
 import {
+  Banknote,
   BookOpen,
   Bot,
   CircleCheck,
+  Coins,
   Globe,
+  GraduationCap,
   Lightbulb,
   Lock,
   Pin,
@@ -34,6 +37,9 @@ const ICONS: Record<string, LucideIcon> = {
   pin: Pin,
   book: BookOpen,
   tools: Wrench,
+  education: GraduationCap,
+  money: Banknote,
+  coin: Coins,
 };
 
 function iconFor(marker: DecorativeMarker): LucideIcon {

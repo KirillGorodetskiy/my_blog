@@ -15,6 +15,9 @@ export const DECORATIVE_MARKERS = [
   '📚',
   '🛠️',
   '🛠',
+  '🧠',
+  '💰',
+  '🪙',
 ] as const;
 
 export type DecorativeMarker =
@@ -40,6 +43,9 @@ export const DECORATIVE_ICON_KEYS: Record<
   '📚': 'book',
   '🛠️': 'tools',
   '🛠': 'tools',
+  '🧠': 'education',
+  '💰': 'money',
+  '🪙': 'coin',
 };
 
 const MARKERS = [...DECORATIVE_MARKERS].sort(

@@ -54,9 +54,12 @@ export function ProjectDetail({
           slug={project.slug}
           label='Edit project'
         />
-        <p className='project-summary'>
-          <MarkdownInline source={project.description} />
-        </p>
+        <div className='project-summary'>
+          <MarkdownContent
+            source={project.description}
+            className='project-content'
+          />
+        </div>
         <ContentMedia
           src={project.image}
           label={`Artwork for ${project.title}`}

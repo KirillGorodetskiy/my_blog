@@ -12,6 +12,15 @@ describe('splitLeadingDecorative', () => {
       rest: 'Reliable delivery',
     });
     expect(DECORATIVE_ICON_KEYS['✅']).toBe('check');
+    expect(
+      splitLeadingDecorative('🧠 Educational example'),
+    ).toEqual({
+      marker: '🧠',
+      rest: 'Educational example',
+    });
+    expect(DECORATIVE_ICON_KEYS['🧠']).toBe('education');
+    expect(DECORATIVE_ICON_KEYS['💰']).toBe('money');
+    expect(DECORATIVE_ICON_KEYS['🪙']).toBe('coin');
   });
 
   it('leaves normal text unchanged', () => {

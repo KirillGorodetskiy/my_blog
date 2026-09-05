@@ -12,11 +12,17 @@ function urlTransform(url: string): string {
 
 export function MarkdownContent({
   source,
+  className,
 }: {
   source: string;
+  className?: string;
 }) {
+  const classes = ['article-body', className]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div className='article-body'>
+    <div className={classes}>
       <Markdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHeadingIds]}

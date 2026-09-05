@@ -42,15 +42,19 @@ export function Header() {
       >
         <Link
           href='/'
+          aria-label='KIRILL'
           className={
-            'text-sm font-semibold tracking-[0.28em] ' +
-            'text-[#edf3ef] ' +
-            'focus-visible:outline-2 ' +
+            'brand focus-visible:outline-2 ' +
             'focus-visible:outline-offset-4 ' +
-            'focus-visible:outline-[#61e6b3]'
+            'focus-visible:outline-[var(--accent)]'
           }
         >
-          KIRILL
+          <span className='brand-name'>KIRILL</span>
+          <span className='brand-divider' aria-hidden='true' />
+          <span className='brand-tagline' aria-hidden='true'>
+            <span>INSPIRED BY ME</span>
+            <span>BUILT WITH AI</span>
+          </span>
         </Link>
         <nav
           aria-label='Primary'

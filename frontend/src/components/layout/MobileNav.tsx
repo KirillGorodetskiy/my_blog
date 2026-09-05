@@ -65,13 +65,13 @@ export function MobileNav({
       />
       <div className='mobile-nav-panel'>
         <div className='flex items-center justify-between'>
-          <p
-            className={
-              'text-sm font-semibold tracking-[0.28em] ' +
-              'text-[#edf3ef]'
-            }
-          >
-            KIRILL
+          <p className='brand'>
+            <span className='brand-name'>KIRILL</span>
+            <span className='brand-divider' aria-hidden='true' />
+            <span className='brand-tagline' aria-hidden='true'>
+              <span>INSPIRED BY ME</span>
+              <span>BUILT WITH AI</span>
+            </span>
           </p>
           <button
             type='button'
