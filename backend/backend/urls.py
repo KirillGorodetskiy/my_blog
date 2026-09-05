@@ -1,14 +1,18 @@
 from django.contrib import admin
 from django.conf import settings
-from django.urls import path, include, re_path
+from django.http import JsonResponse
+from django.urls import include, path, re_path
 from django.views.static import serve
 
 
+def healthz(_request):
+    return JsonResponse({'status': 'ok'})
+
+
 urlpatterns = [
-    path('admin/', admin.site.urls, name='admin'),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('admin/', admin.site.urls),
     path('api/v1/', include('blog.api.urls')),
-    path('', include('blog.urls')),
+    path('healthz/', healthz),
     re_path(
         r'^media/(?P<path>.*)$',
         serve,

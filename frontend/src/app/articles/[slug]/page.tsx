@@ -6,6 +6,8 @@ import { RelatedList } from '@/components/article/RelatedList';
 import { ShareActions } from '@/components/article/ShareActions';
 import { TableOfContents } from '@/components/article/TableOfContents';
 import { CommentSection } from '@/components/comments/CommentSection';
+import { StaffEditLink } from '@/components/content/StaffEditLink';
+import { MarkdownInline } from '@/components/markdown/MarkdownInline';
 import { ContentMedia } from '@/components/ui/ContentMedia';
 import { listArticles } from '@/lib/api/articles';
 import { loadArticle } from '@/lib/api/load';
@@ -14,7 +16,7 @@ import {
   getRelatedArticles,
 } from '@/lib/content';
 import { formatDate } from '@/lib/dates';
-import { extractHeadings, parseMarkdown } from '@/lib/markdown';
+import { extractHeadings } from '@/lib/markdown';
 import { articleMetadata } from '@/lib/metadata';
 
 export const dynamic = 'force-dynamic';
@@ -43,7 +45,7 @@ export default async function ArticleDetailPage({
   }
 
   const articles = await listArticles();
-  const headings = extractHeadings(parseMarkdown(article.body));
+  const headings = extractHeadings(article.body);
   const { previous, next } = getAdjacentArticles(
     article.slug,
     articles,
@@ -60,7 +62,14 @@ export default async function ArticleDetailPage({
           {article.readTimeMinutes} min read
         </p>
         <h1 className='article-title'>{article.title}</h1>
-        <p className='article-excerpt'>{article.excerpt}</p>
+        <StaffEditLink
+          kind='article'
+          slug={article.slug}
+          label='Edit article'
+        />
+        <p className='article-excerpt'>
+          <MarkdownInline source={article.excerpt} />
+        </p>
         <ul className='article-tags'>
           {article.tags.map((tag) => (
             <li key={tag}>{tag}</li>

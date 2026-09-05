@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Project } from '@/data/types';
+import { MarkdownInline } from '@/components/markdown/MarkdownInline';
 import { ContentMedia } from '@/components/ui/ContentMedia';
 
 interface ProjectCardProps {
@@ -45,7 +46,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
             {project.title}
           </h3>
           <p className='text-sm leading-relaxed text-[#91a09a]'>
-            {project.description}
+            <MarkdownInline
+              source={project.description}
+              allowLinks={false}
+            />
           </p>
         </div>
       </Link>

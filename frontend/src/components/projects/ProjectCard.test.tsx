@@ -14,4 +14,19 @@ describe('ProjectCard', () => {
       '/projects/ai-lead-qualification',
     );
   });
+
+  it('renders inline markdown in the description', () => {
+    const { container } = render(
+      <ProjectCard
+        project={{
+          ...projects[0],
+          description: '**Django** + `PostgreSQL`',
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Django').tagName).toBe('STRONG');
+    expect(screen.getByText('PostgreSQL').tagName).toBe('CODE');
+    expect(container.textContent).not.toContain('**');
+  });
 });

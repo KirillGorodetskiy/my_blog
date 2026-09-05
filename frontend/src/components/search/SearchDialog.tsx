@@ -8,6 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
+import { MarkdownInline } from '@/components/markdown/MarkdownInline';
 import { useSearchOverlay } from '@/components/search/SearchContext';
 import { searchContent } from '@/lib/api/search';
 import { searchHitsToItems } from '@/lib/api/searchMap';
@@ -206,7 +207,10 @@ export function SearchDialog() {
                         >
                           <span>{item.title}</span>
                           <span className='search-item-detail'>
-                            {item.detail}
+                            <MarkdownInline
+                              source={item.detail}
+                              allowLinks={false}
+                            />
                           </span>
                         </button>
                       </li>

@@ -116,7 +116,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'blog',
+    'blog.apps.BlogConfig',
 ]
 
 MIDDLEWARE = [
@@ -135,7 +135,7 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -228,11 +228,10 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGOUT_REDIRECT_URL = '/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/admin/login/'
+LOGOUT_REDIRECT_URL = '/admin/'
+LOGIN_REDIRECT_URL = '/admin/'
 
-POST_COUNT_ON_PAGE = 10
-PROJECT_COUNT_ON_PAGE = 10
 WORDS_PER_MINUTE = 225
 COMMENT_MIN_LENGTH = 3
 COMMENT_MAX_LENGTH = 3000

@@ -137,6 +137,19 @@ body {
   line-height: 1.12;
 }
 
+.staff-edit-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: #61e6b3;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+
+.staff-edit-link:hover,
+.staff-edit-link:focus-visible {
+  color: #edf3ef;
+}
+
 .article-excerpt,
 .project-summary,
 .not-found-copy,
@@ -220,12 +233,22 @@ body {
   text-decoration: none;
 }
 
+h1.article-heading {
+  font-size: 2.1rem;
+}
+
 h2.article-heading {
   font-size: 1.85rem;
 }
 
 h3.article-heading {
   font-size: 1.35rem;
+}
+
+h4.article-heading,
+h5.article-heading,
+h6.article-heading {
+  font-size: 1.15rem;
 }
 
 .article-heading-copy {
@@ -241,11 +264,79 @@ h3.article-heading {
   padding-left: 1.2rem;
 }
 
+.article-list .article-list {
+  margin-top: 0.45rem;
+}
+
+.article-list .article-p {
+  margin-top: 0.4rem;
+}
+
+.article-list > li > .article-p:first-child {
+  margin-top: 0;
+}
+
 .article-quote {
   border-left: 2px solid #61e6b3;
   padding-left: 1rem;
   color: #c3d0ca;
   font-style: italic;
+}
+
+.article-quote .article-p {
+  margin-top: 0.6rem;
+}
+
+.article-quote .article-p:first-child {
+  margin-top: 0;
+}
+
+.markdown-icon-wrap {
+  display: inline;
+}
+
+.markdown-icon {
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  margin-right: 0.35em;
+  vertical-align: -0.12em;
+  color: #61e6b3;
+}
+
+.article-table-wrap {
+  margin-top: 1.25rem;
+  overflow-x: auto;
+}
+
+.article-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.article-table th,
+.article-table td {
+  border: 1px solid #183032;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.article-table th {
+  color: #edf3ef;
+  font-weight: 600;
+}
+
+.article-task {
+  margin-right: 0.45rem;
+  accent-color: #61e6b3;
+  vertical-align: middle;
+}
+
+.article-rule {
+  margin: 2rem 0 0;
+  border: 0;
+  border-top: 1px solid #183032;
 }
 
 .article-inline-code,

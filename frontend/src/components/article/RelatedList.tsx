@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { MarkdownInline } from '@/components/markdown/MarkdownInline';
 
 interface RelatedItem {
   slug: string;
@@ -33,7 +34,10 @@ export function RelatedList({
                 {item.title}
               </span>
               <span className='related-item-detail'>
-                {item.detail}
+                <MarkdownInline
+                  source={item.detail}
+                  allowLinks={false}
+                />
               </span>
             </Link>
           </li>

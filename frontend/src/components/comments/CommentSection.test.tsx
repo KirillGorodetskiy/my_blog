@@ -49,7 +49,7 @@ describe('CommentSection', () => {
       {
         id: 2,
         author: 'other',
-        body: 'Someone else',
+        body: 'Someone else with **bold**',
         createdAt: '2026-09-05T12:01:00Z',
         status: 'approved',
         canDelete: false,
@@ -62,7 +62,10 @@ describe('CommentSection', () => {
     expect(
       await screen.findByText('Mine to remove'),
     ).toBeInTheDocument();
-    expect(screen.getByText('Someone else')).toBeInTheDocument();
+    expect(
+      screen.getByText('Someone else with **bold**'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('bold')).not.toBeInTheDocument();
     expect(
       screen.getAllByRole('button', { name: 'Delete' }),
     ).toHaveLength(1);
@@ -81,6 +84,8 @@ describe('CommentSection', () => {
     expect(
       screen.queryByText('Mine to remove'),
     ).not.toBeInTheDocument();
-    expect(screen.getByText('Someone else')).toBeInTheDocument();
+    expect(
+      screen.getByText('Someone else with **bold**'),
+    ).toBeInTheDocument();
   });
 });
