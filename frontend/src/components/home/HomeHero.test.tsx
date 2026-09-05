@@ -11,7 +11,6 @@ vi.mock('@/components/transitions/TransitionContext', () => ({
     reduced: true,
     isClient: false,
     isTransitioning: false,
-    exitGhost: null,
     markSettled: () => undefined,
   }),
 }));
@@ -35,7 +34,7 @@ describe('HomeHero', () => {
       .getByRole('link', { name: 'Explore articles' })
       .closest('.hero-room-actions');
 
-    expect(actions).toHaveClass('lg:hidden');
+    expect(actions).toHaveClass('hero-room-actions');
     expect(
       screen.getByRole('link', { name: 'View projects' })
         .closest('.hero-room-actions'),

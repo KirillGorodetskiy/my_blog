@@ -13,7 +13,6 @@ vi.mock('@/components/transitions/TransitionContext', () => ({
     reduced: true,
     isClient: false,
     isTransitioning: false,
-    exitGhost: null,
     markSettled: () => undefined,
   }),
 }));
@@ -34,11 +33,10 @@ describe('room heroes', () => {
       expect(
         container.querySelector('.scene-hero-art-wrap'),
       ).not.toBeNull();
-      expect(
-        screen.getByRole('heading', { level: 1 }).closest(
-          '.scene-hero-copy',
-        ),
-      ).not.toBeNull();
+      const title = screen.getByRole('heading', { level: 1 });
+
+      expect(title.closest('.scene-hero-copy')).not.toBeNull();
+      expect(title).toHaveClass('scene-hero-title');
     },
   );
 });

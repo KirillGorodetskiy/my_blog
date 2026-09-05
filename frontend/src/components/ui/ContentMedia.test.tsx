@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {
+  bypassesImageOptimizer,
   ContentMedia,
   hasUsableMediaSrc,
+  ROLE_SIZES,
 } from '@/components/ui/ContentMedia';
 
 describe('hasUsableMediaSrc', () => {
@@ -16,6 +18,23 @@ describe('hasUsableMediaSrc', () => {
   it('rejects empty values', () => {
     expect(hasUsableMediaSrc('')).toBe(false);
     expect(hasUsableMediaSrc('   ')).toBe(false);
+  });
+});
+
+describe('bypassesImageOptimizer', () => {
+  it('keeps uploads and remote urls off the optimizer', () => {
+    expect(bypassesImageOptimizer('/media/posts/a.jpg')).toBe(
+      true,
+    );
+    expect(
+      bypassesImageOptimizer('https://gkablog.com/media/a.png'),
+    ).toBe(true);
+  });
+
+  it('lets local static artwork use Next image', () => {
+    expect(
+      bypassesImageOptimizer('/images/articles/cover.webp'),
+    ).toBe(false);
   });
 });
 
@@ -74,7 +93,7 @@ describe('ContentMedia', () => {
     expect(image).toHaveStyle({ objectPosition: '50% 20%' });
   });
 
-  it('keeps content images at their natural height', () => {
+  it('reserves space and never crops content images', () => {
     const { container } = render(
       <ContentMedia
         role='article-content-image'
@@ -86,17 +105,19 @@ describe('ContentMedia', () => {
     const image = screen.getByRole('img', {
       name: 'Architecture diagram',
     });
+    const frame = container.querySelector(
+      '.article-content-image',
+    );
 
-    expect(
-      container.querySelector('.article-content-image'),
-    ).toBe(image);
+    expect(frame).not.toBeNull();
+    expect(frame).toHaveClass('relative');
+    expect(image).toHaveClass('object-contain');
     expect(image).not.toHaveClass('object-cover');
-    expect(image).not.toHaveClass('object-contain');
-    expect(image.parentElement).not.toHaveClass('relative');
+    expect(ROLE_SIZES['article-content-image']).toContain('48rem');
   });
 
   it('keeps screenshots readable without cropping', () => {
-    render(
+    const { container } = render(
       <ContentMedia
         role='article-screenshot'
         src='/media/projects/shot.png'
@@ -108,7 +129,10 @@ describe('ContentMedia', () => {
       name: 'Bot settings screen',
     });
 
-    expect(image).toHaveClass('article-screenshot');
+    expect(
+      container.querySelector('.article-screenshot'),
+    ).not.toBeNull();
+    expect(image).toHaveClass('object-contain');
     expect(image).not.toHaveClass('object-cover');
   });
 

@@ -91,4 +91,24 @@ describe('MobileNav', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('locks the document with a stable gutter class', () => {
+    const { unmount } = render(
+      <AuthProvider>
+        <MobileNav
+          open
+          links={LINKS}
+          pathname='/'
+          onClose={() => undefined}
+        />
+      </AuthProvider>,
+    );
+
+    expect(document.documentElement).toHaveClass('nav-lock');
+    expect(document.body.style.overflow).toBe('');
+
+    unmount();
+
+    expect(document.documentElement).not.toHaveClass('nav-lock');
+  });
 });

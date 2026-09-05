@@ -58,8 +58,13 @@ There is no `requirements.txt`.
 ```bash
 cd frontend
 npm install
+npx playwright install chromium
 npm run dev
 ```
+
+Unit tests: `npm test`. Browser layout tests:
+`npm run test:e2e` (Next on :3000 and the API
+should be reachable).
 
 ### Local URLs
 

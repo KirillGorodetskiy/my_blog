@@ -37,13 +37,25 @@ export function MobileNav({
     };
 
     document.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('nav-lock');
 
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
+      document.documentElement.classList.remove('nav-lock');
     };
   }, [open, onClose]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(min-width: 1280px)');
+    const onChange = () => {
+      if (media.matches) {
+        onClose();
+      }
+    };
+
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, [onClose]);
 
   if (!open || typeof document === 'undefined') {
     return null;

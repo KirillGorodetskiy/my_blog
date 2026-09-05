@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import { SceneHeroArt } from '@/components/hero/SceneHeroArt';
 import {
   HeroArtwork,
   HeroCopy,
@@ -17,7 +17,7 @@ export function HomeHero() {
     >
       <div className='scene-hero-art-wrap'>
         <HeroArtwork>
-          <Image
+          <SceneHeroArt
             src='/images/home-panorama.jpg'
             alt={
               'A mountain shelter at night: library on the ' +
@@ -25,11 +25,6 @@ export function HomeHero() {
               'workshop on the right, with a lake, moon, ' +
               'and Milky Way outside.'
             }
-            width={1024}
-            height={438}
-            unoptimized
-            priority
-            className='scene-hero-art h-auto w-full'
           />
         </HeroArtwork>
       </div>
@@ -76,8 +71,7 @@ export function HomeHero() {
           </p>
           <div
             className={
-              'hero-room-actions mt-8 flex flex-wrap gap-3 ' +
-              'lg:hidden'
+              'hero-room-actions mt-8 flex flex-wrap gap-3'
             }
           >
             <Button href='/articles'>Explore articles</Button>

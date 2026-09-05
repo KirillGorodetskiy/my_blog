@@ -21,7 +21,9 @@ export function HeroArtwork({
   };
 
   if (!state.isClient) {
-    return <div className='relative'>{children}</div>;
+    return (
+      <div className='relative h-full w-full'>{children}</div>
+    );
   }
 
   return (
@@ -29,7 +31,7 @@ export function HeroArtwork({
       custom={options}
       variants={heroArtVariants}
       transition={getRoomTransition(options)}
-      className='relative'
+      className='relative h-full w-full'
     >
       {children}
     </motion.div>

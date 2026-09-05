@@ -58,7 +58,7 @@ export function Header() {
         </Link>
         <nav
           aria-label='Primary'
-          className='hidden items-center gap-8 md:flex'
+          className='hidden items-center gap-8 xl:flex'
         >
           {NAV_LINKS.map((link) => {
             const current = isCurrentPath(pathname, link.href);
@@ -108,10 +108,10 @@ export function Header() {
           >
             <Search size={18} strokeWidth={1.6} />
           </button>
-          <div className='hidden md:block'>
+          <div className='hidden xl:block'>
             <AuthControls />
           </div>
-          <div className='hidden md:block'>
+          <div className='hidden xl:block'>
             <Button
               href='mailto:hello@gkablog.com'
               variant='outline'
@@ -122,7 +122,7 @@ export function Header() {
           <button
             type='button'
             className={
-              'rounded-full p-2 text-[#edf3ef] md:hidden ' +
+              'rounded-full p-2 text-[#edf3ef] xl:hidden ' +
               'focus-visible:outline-2 ' +
               'focus-visible:outline-offset-4 ' +
               'focus-visible:outline-[#61e6b3]'
