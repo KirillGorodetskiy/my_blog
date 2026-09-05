@@ -48,7 +48,7 @@ export default async function ArticleDetailPage({
     article.slug,
     articles,
   );
-  const related = getRelatedArticles(article.slug, 3, articles);
+  const related = getRelatedArticles(article.slug, articles, 3);
 
   return (
     <article>

@@ -1,7 +1,6 @@
 from datetime import timedelta
 
 from django.conf import settings
-from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.exceptions import Throttled, ValidationError
 
@@ -13,28 +12,30 @@ from blog.textnorm import (
 )
 
 
-def _rate_key(kind: str, user_id: int, ip: str) -> str:
-    return f'comment-rate:{kind}:{user_id}:{ip}'
-
-
-def enforce_comment_rate(user_id: int, ip: str) -> None:
-    limits = (
-        ('minute', 60, settings.COMMENT_RATE_PER_MINUTE),
-        (
-            'ten',
-            600,
-            settings.COMMENT_RATE_PER_10_MINUTES,
-        ),
-        ('day', 86400, settings.COMMENT_RATE_PER_DAY),
+def can_delete_comment(user, comment: Comment) -> bool:
+    if not getattr(user, 'is_authenticated', False):
+        return False
+    return (
+        comment.author_id == user.id or user.is_superuser
     )
-    for kind, window, limit in limits:
-        key = _rate_key(kind, user_id, ip)
-        used = cache.get(key, 0)
+
+
+def enforce_comment_rate(user_id: int) -> None:
+    now = timezone.now()
+    limits = (
+        (60, settings.COMMENT_RATE_PER_MINUTE),
+        (600, settings.COMMENT_RATE_PER_10_MINUTES),
+        (86400, settings.COMMENT_RATE_PER_DAY),
+    )
+    for window, limit in limits:
+        used = Comment.objects.filter(
+            author_id=user_id,
+            created_at__gte=now - timedelta(seconds=window),
+        ).count()
         if used >= limit:
             raise Throttled(
                 detail='Comment rate limit exceeded.',
             )
-        cache.set(key, used + 1, timeout=window)
 
 
 def apply_moderation(body: str) -> tuple[str, str]:
@@ -84,11 +85,17 @@ def validate_comment_body(body: str) -> str:
     minimum = settings.COMMENT_MIN_LENGTH
     maximum = settings.COMMENT_MAX_LENGTH
     if len(text) < minimum:
-        raise ValidationError(
-            {'body': f'Comment must be at least {minimum} characters.'},
-        )
+        raise ValidationError({
+            'body': (
+                f'Comment must be at least {minimum} '
+                'characters.'
+            ),
+        })
     if len(text) > maximum:
-        raise ValidationError(
-            {'body': f'Comment must be at most {maximum} characters.'},
-        )
+        raise ValidationError({
+            'body': (
+                f'Comment must be at most {maximum} '
+                'characters.'
+            ),
+        })
     return text

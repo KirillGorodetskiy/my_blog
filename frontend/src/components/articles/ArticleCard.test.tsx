@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ArticleCard } from '@/components/articles/ArticleCard';
-import { articles } from '@/data/articles';
+import { articles } from '@/test/fixtures/articles';
 
 describe('ArticleCard', () => {
   it('links to the article detail route', () => {

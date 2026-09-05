@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ARTICLE_CATEGORIES, articles } from '@/data/articles';
+import { ARTICLE_CATEGORIES } from '@/data/types';
+import { articles } from '@/test/fixtures/articles';
 import { featuredItems } from '@/lib/filters';
 
 describe('articles mock data', () => {

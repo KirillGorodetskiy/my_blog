@@ -1,4 +1,4 @@
-import type { ArticleCategory } from '@/data/articles';
+import type { ArticleCategory } from '@/data/types';
 
 export type ArticleFilterValue = 'All' | ArticleCategory;
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { PROJECT_CATEGORIES, projects } from '@/data/projects';
+import { PROJECT_CATEGORIES } from '@/data/types';
+import { projects } from '@/test/fixtures/projects';
 import { featuredItems } from '@/lib/filters';
 
 describe('projects mock data', () => {

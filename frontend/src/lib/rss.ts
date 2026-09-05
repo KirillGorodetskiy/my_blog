@@ -1,4 +1,3 @@
-import { articles as demoArticles } from '@/data/articles';
 import type { Article } from '@/data/types';
 import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
 
@@ -16,7 +15,7 @@ function rssDate(isoDate: string): string {
 
 export function buildArticlesRss(
   siteUrl: string,
-  feedItems: Article[] = demoArticles,
+  feedItems: Article[],
 ): string {
   const origin = siteUrl.replace(/\/$/, '');
   const items = [...feedItems]

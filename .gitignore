@@ -21,3 +21,8 @@ db/dumps/*
 
 backend/media/*
 !backend/media/.gitkeep
+
+.coverage
+htmlcov/
+backend/staticfiles/
+structure.txt

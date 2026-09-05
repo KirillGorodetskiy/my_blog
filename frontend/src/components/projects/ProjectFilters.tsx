@@ -1,4 +1,4 @@
-import type { ProjectCategory } from '@/data/projects';
+import type { ProjectCategory } from '@/data/types';
 
 export type ProjectFilterValue = 'All' | ProjectCategory;
 

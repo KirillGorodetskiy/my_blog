@@ -1,5 +1,3 @@
-import { articles } from '@/data/articles';
-import { projects } from '@/data/projects';
 import type { Article, Project } from '@/data/types';
 
 function byDateAsc(left: Article, right: Article): number {
@@ -8,21 +6,21 @@ function byDateAsc(left: Article, right: Article): number {
 
 export function getArticle(
   slug: string,
-  collection: Article[] = articles,
+  collection: Article[],
 ): Article | undefined {
   return collection.find((article) => article.slug === slug);
 }
 
 export function getProject(
   slug: string,
-  collection: Project[] = projects,
+  collection: Project[],
 ): Project | undefined {
   return collection.find((project) => project.slug === slug);
 }
 
 export function getAdjacentArticles(
   slug: string,
-  collection: Article[] = articles,
+  collection: Article[],
 ): {
   previous?: Article;
   next?: Article;
@@ -52,8 +50,8 @@ function overlap(left: string[], right: string[]): number {
 
 export function getRelatedArticles(
   slug: string,
+  collection: Article[],
   limit = 3,
-  collection: Article[] = articles,
 ): Article[] {
   const current = getArticle(slug, collection);
 
@@ -88,8 +86,8 @@ export function getRelatedArticles(
 
 export function getRelatedProjects(
   slug: string,
+  collection: Project[],
   limit = 3,
-  collection: Project[] = projects,
 ): Project[] {
   const current = getProject(slug, collection);
 

@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ARTICLE_CATEGORIES } from '@/data/articles';
+import { ARTICLE_CATEGORIES } from '@/data/types';
 import type { Article } from '@/data/types';
 import {
   categoryToParam,

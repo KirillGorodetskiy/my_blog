@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { buildArticlesRss } from '@/lib/rss';
-import { articles } from '@/data/articles';
+import { articles } from '@/test/fixtures/articles';
 
 describe('buildArticlesRss', () => {
   it('includes title, link, date, and excerpt for each article', () => {
-    const xml = buildArticlesRss('https://gkablog.com');
+    const xml = buildArticlesRss(
+      'https://gkablog.com',
+      articles,
+    );
 
     expect(xml.startsWith('<?xml')).toBe(true);
     expect(xml).toContain('<rss version="2.0">');

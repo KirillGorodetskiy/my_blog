@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { articles } from '@/test/fixtures/articles';
+import { projects } from '@/test/fixtures/projects';
 import { getArticle, getProject } from '@/lib/content';
 import {
   absoluteTitle,
@@ -8,7 +10,7 @@ import {
 
 describe('metadata helpers', () => {
   it('builds an article title from the content', () => {
-    const article = getArticle('personal-rag-vps');
+    const article = getArticle('personal-rag-vps', articles);
 
     expect(article).toBeDefined();
     expect(absoluteTitle(article?.title ?? '')).toBe(
@@ -20,7 +22,10 @@ describe('metadata helpers', () => {
   });
 
   it('builds a project title from the content', () => {
-    const project = getProject('ai-lead-qualification');
+    const project = getProject(
+      'ai-lead-qualification',
+      projects,
+    );
 
     expect(projectMetadata(project!).title).toEqual({
       absolute:

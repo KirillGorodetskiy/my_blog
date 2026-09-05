@@ -179,6 +179,7 @@ class SearchProjectSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.CharField(source='author.username')
     createdAt = serializers.DateTimeField(source='created_at')
+    canDelete = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
@@ -188,7 +189,16 @@ class CommentSerializer(serializers.ModelSerializer):
             'body',
             'createdAt',
             'status',
+            'canDelete',
         )
+
+    def get_canDelete(self, obj: Comment) -> bool:
+        from blog.comments import can_delete_comment
+
+        request = self.context.get('request')
+        if request is None:
+            return False
+        return can_delete_comment(request.user, obj)
 
 
 class CommentCreateSerializer(serializers.Serializer):
@@ -205,6 +215,7 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     passwordConfirm = serializers.CharField(write_only=True)
+    turnstileToken = serializers.CharField(write_only=True)
 
     def validate_username(self, value: str) -> str:
         if User.objects.filter(username__iexact=value).exists():
@@ -221,6 +232,9 @@ class RegisterSerializer(serializers.Serializer):
         return value
 
     def validate(self, attrs):
+        from blog.turnstile import verify_turnstile
+
+        verify_turnstile(attrs.pop('turnstileToken'))
         if attrs['password'] != attrs['passwordConfirm']:
             raise serializers.ValidationError(
                 {'passwordConfirm': 'Passwords do not match.'},
@@ -261,4 +275,5 @@ class MeSerializer(serializers.Serializer):
     isAuthenticated = serializers.BooleanField()
     username = serializers.CharField(allow_null=True)
     email = serializers.CharField(allow_null=True)
+    isStaff = serializers.BooleanField()
     isSuperuser = serializers.BooleanField()

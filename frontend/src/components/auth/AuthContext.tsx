@@ -19,6 +19,7 @@ const anonymous: AuthUser = {
   isAuthenticated: false,
   username: null,
   email: null,
+  isStaff: false,
   isSuperuser: false,
 };
 
@@ -31,6 +32,7 @@ interface AuthContextValue {
     email: string;
     password: string;
     passwordConfirm: string;
+    turnstileToken: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
 }

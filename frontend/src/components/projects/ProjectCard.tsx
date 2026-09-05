@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Project } from '@/data/projects';
+import type { Project } from '@/data/types';
 import { ContentMedia } from '@/components/ui/ContentMedia';
 
 interface ProjectCardProps {

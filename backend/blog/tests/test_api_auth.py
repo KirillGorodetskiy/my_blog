@@ -10,15 +10,44 @@ User = get_user_model()
 pytestmark = pytest.mark.django_db
 
 
+def register_payload(**overrides):
+    data = {
+        'username': 'reader',
+        'email': 'reader@example.com',
+        'password': 'SafePass123!',
+        'passwordConfirm': 'SafePass123!',
+        'turnstileToken': 'test-ok',
+    }
+    data.update(overrides)
+    return data
+
+
+class CsrfAPIClient(APIClient):
+    def generic(self, method, path, *args, **kwargs):
+        token = self.cookies.get('csrftoken')
+        if token is not None:
+            kwargs.setdefault('HTTP_X_CSRFTOKEN', token.value)
+        return super().generic(method, path, *args, **kwargs)
+
+
+def csrf_api():
+    client = CsrfAPIClient(enforce_csrf_checks=True)
+    client.get('/api/v1/auth/me/')
+    return client
+
+
 @pytest.fixture
 def api():
-    return APIClient()
+    return csrf_api()
 
 
 def test_me_anonymous_and_sets_csrf(api):
     response = api.get('/api/v1/auth/me/')
     assert response.status_code == HTTPStatus.OK
-    assert response.json()['isAuthenticated'] is False
+    payload = response.json()
+    assert payload['isAuthenticated'] is False
+    assert payload['isStaff'] is False
+    assert payload['isSuperuser'] is False
     assert 'csrftoken' in response.cookies
 
 
@@ -29,12 +58,10 @@ def test_auth_paths_work_without_trailing_slash(api):
 
     created = api.post(
         '/api/v1/auth/register',
-        {
-            'username': 'slashuser',
-            'email': 'slash@example.com',
-            'password': 'SafePass123!',
-            'passwordConfirm': 'SafePass123!',
-        },
+        register_payload(
+            username='slashuser',
+            email='slash@example.com',
+        ),
         format='json',
     )
     assert created.status_code == HTTPStatus.CREATED
@@ -51,7 +78,7 @@ def test_auth_paths_work_without_trailing_slash(api):
     assert login.status_code == HTTPStatus.OK
 
 
-def test_login_csrf_allows_local_next_origin():
+def test_login_csrf_succeeds_with_valid_token():
     User.objects.create_user(
         username='localnext',
         email='localnext@example.com',
@@ -71,25 +98,94 @@ def test_login_csrf_allows_local_next_origin():
         HTTP_ORIGIN='http://localhost:3001',
     )
     assert response.status_code == HTTPStatus.OK
+    assert response.json()['isStaff'] is False
+
+
+def test_login_csrf_rejected_without_token():
+    User.objects.create_user(
+        username='nocsrf',
+        email='nocsrf@example.com',
+        password='SafePass123!',
+    )
+    client = Client(enforce_csrf_checks=True)
+    client.get('/api/v1/auth/me/')
+    response = client.post(
+        '/api/v1/auth/login/',
+        data=(
+            '{"username":"nocsrf",'
+            '"password":"SafePass123!"}'
+        ),
+        content_type='application/json',
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_register_csrf_succeeds_with_valid_token():
+    client = Client(enforce_csrf_checks=True)
+    client.get('/api/v1/auth/me/')
+    token = client.cookies['csrftoken'].value
+    response = client.post(
+        '/api/v1/auth/register/',
+        data=(
+            '{"username":"csrfok",'
+            '"email":"csrfok@example.com",'
+            '"password":"SafePass123!",'
+            '"passwordConfirm":"SafePass123!",'
+            '"turnstileToken":"test-ok"}'
+        ),
+        content_type='application/json',
+        HTTP_X_CSRFTOKEN=token,
+        HTTP_ORIGIN='http://localhost:3001',
+    )
+    assert response.status_code == HTTPStatus.CREATED
+
+
+def test_register_csrf_rejected_without_token():
+    client = Client(enforce_csrf_checks=True)
+    client.get('/api/v1/auth/me/')
+    response = client.post(
+        '/api/v1/auth/register/',
+        data=(
+            '{"username":"csrfbad",'
+            '"email":"csrfbad@example.com",'
+            '"password":"SafePass123!",'
+            '"passwordConfirm":"SafePass123!",'
+            '"turnstileToken":"test-ok"}'
+        ),
+        content_type='application/json',
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+def test_register_creates_normal_non_staff_user(api):
+    created = api.post(
+        '/api/v1/auth/register/',
+        register_payload(),
+        format='json',
+    )
+    assert created.status_code == HTTPStatus.CREATED
+    payload = created.json()
+    assert payload['username'] == 'reader'
+    assert payload['isStaff'] is False
+    assert payload['isSuperuser'] is False
+    assert 'password' not in payload
+
+    user = User.objects.get(username='reader')
+    assert user.is_staff is False
+    assert user.is_superuser is False
 
 
 def test_register_login_logout_roundtrip(api):
     created = api.post(
         '/api/v1/auth/register/',
-        {
-            'username': 'reader',
-            'email': 'reader@example.com',
-            'password': 'SafePass123!',
-            'passwordConfirm': 'SafePass123!',
-        },
+        register_payload(),
         format='json',
     )
     assert created.status_code == HTTPStatus.CREATED
-    assert created.json()['username'] == 'reader'
-    assert 'password' not in created.json()
 
     me = api.get('/api/v1/auth/me/')
     assert me.json()['isAuthenticated'] is True
+    assert me.json()['isStaff'] is False
 
     api.post('/api/v1/auth/logout/')
     assert api.get('/api/v1/auth/me/').json()[
@@ -110,6 +206,21 @@ def test_register_login_logout_roundtrip(api):
     ] is True
 
 
+def test_staff_me_reports_staff_flags(api):
+    user = User.objects.create_user(
+        username='editor',
+        email='editor@example.com',
+        password='SafePass123!',
+    )
+    user.is_staff = True
+    user.save(update_fields=['is_staff'])
+    api.force_login(user)
+    payload = api.get('/api/v1/auth/me/').json()
+    assert payload['isAuthenticated'] is True
+    assert payload['isStaff'] is True
+    assert payload['isSuperuser'] is False
+
+
 def test_register_rejects_duplicate_and_weak_password(api):
     User.objects.create_user(
         username='taken',
@@ -118,27 +229,34 @@ def test_register_rejects_duplicate_and_weak_password(api):
     )
     duplicate = api.post(
         '/api/v1/auth/register/',
-        {
-            'username': 'taken',
-            'email': 'other@example.com',
-            'password': 'SafePass123!',
-            'passwordConfirm': 'SafePass123!',
-        },
+        register_payload(
+            username='taken',
+            email='other@example.com',
+        ),
         format='json',
     )
     assert duplicate.status_code == HTTPStatus.BAD_REQUEST
 
     weak = api.post(
         '/api/v1/auth/register/',
-        {
-            'username': 'fresh',
-            'email': 'fresh@example.com',
-            'password': '123',
-            'passwordConfirm': '123',
-        },
+        register_payload(
+            username='fresh',
+            email='fresh@example.com',
+            password='123',
+            passwordConfirm='123',
+        ),
         format='json',
     )
     assert weak.status_code == HTTPStatus.BAD_REQUEST
+
+
+def test_register_rejects_missing_turnstile(api):
+    response = api.post(
+        '/api/v1/auth/register/',
+        register_payload(turnstileToken=''),
+        format='json',
+    )
+    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_csrf_required_for_authenticated_post():

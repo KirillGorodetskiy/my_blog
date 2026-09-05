@@ -32,6 +32,11 @@ export function AuthControls({
   return (
     <div className='flex items-center gap-3'>
       <span className='auth-user'>{user.username}</span>
+      {user.isStaff ? (
+        <a href='/admin/' className='auth-link'>
+          Admin
+        </a>
+      ) : null}
       <button
         type='button'
         className='auth-link'

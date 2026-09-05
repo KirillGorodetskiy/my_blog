@@ -4,6 +4,7 @@ export interface AuthUser {
   isAuthenticated: boolean;
   username: string | null;
   email: string | null;
+  isStaff: boolean;
   isSuperuser: boolean;
 }
 
@@ -16,6 +17,7 @@ export function registerUser(input: {
   email: string;
   password: string;
   passwordConfirm: string;
+  turnstileToken: string;
 }): Promise<AuthUser> {
   return fetchJson<AuthUser>('/api/v1/auth/register/', {
     method: 'POST',

@@ -272,7 +272,8 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_PATH = '/'
 CSRF_COOKIE_PATH = '/'
 
-if os.getenv('DJANGO_BEHIND_PROXY', '0') == '1':
+BEHIND_PROXY = os.getenv('DJANGO_BEHIND_PROXY', '0') == '1'
+if BEHIND_PROXY:
     USE_X_FORWARDED_HOST = True
     SECURE_PROXY_SSL_HEADER = (
         'HTTP_X_FORWARDED_PROTO',
@@ -282,3 +283,13 @@ if os.getenv('DJANGO_BEHIND_PROXY', '0') == '1':
 if os.getenv('DJANGO_SECURE_COOKIES', '0') == '1':
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+TURNSTILE_SECRET_KEY = os.getenv('TURNSTILE_SECRET_KEY', '')
+_testing = (
+    os.getenv('DJANGO_TESTING') == '1'
+    or any('pytest' in arg for arg in sys.argv)
+)
+TURNSTILE_SKIP_VERIFY = os.getenv(
+    'TURNSTILE_SKIP_VERIFY',
+    '1' if _testing else '0',
+) == '1'

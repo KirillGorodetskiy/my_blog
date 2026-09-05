@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { formatDate } from '@/lib/dates';
-import type { Article } from '@/data/articles';
+import type { Article } from '@/data/types';
 import { ContentMedia } from '@/components/ui/ContentMedia';
 
 interface ArticleCardProps {

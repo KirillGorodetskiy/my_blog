@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { articles } from '@/data/articles';
-import { projects } from '@/data/projects';
+import { articles } from '@/test/fixtures/articles';
+import { projects } from '@/test/fixtures/projects';
 import {
   getArticle,
   getAdjacentArticles,
@@ -11,33 +11,41 @@ import {
 
 describe('getArticle', () => {
   it('returns the article for a known slug', () => {
-    const article = getArticle('personal-rag-vps');
+    const article = getArticle('personal-rag-vps', articles);
 
     expect(article?.title).toContain('RAG');
   });
 
   it('returns undefined for an unknown slug', () => {
-    expect(getArticle('missing-note')).toBeUndefined();
+    expect(
+      getArticle('missing-note', articles),
+    ).toBeUndefined();
   });
 });
 
 describe('getProject', () => {
   it('returns the project for a known slug', () => {
-    const project = getProject('ai-lead-qualification');
+    const project = getProject(
+      'ai-lead-qualification',
+      projects,
+    );
 
     expect(project?.title).toContain('Lead Qualification');
   });
 
   it('returns undefined for an unknown slug', () => {
-    expect(getProject('missing-build')).toBeUndefined();
+    expect(
+      getProject('missing-build', projects),
+    ).toBeUndefined();
   });
 });
 
 describe('getAdjacentArticles', () => {
   it('walks previous and next in date order', () => {
-    const current = getArticle('finding-focus');
+    const current = getArticle('finding-focus', articles);
     const { previous, next } = getAdjacentArticles(
       current?.slug ?? '',
+      articles,
     );
 
     expect(previous?.slug).toBe('quiet-automation-desk');
@@ -46,7 +54,10 @@ describe('getAdjacentArticles', () => {
 
   it('ends the chain on the newest article', () => {
     const newest = articles[0];
-    const { next } = getAdjacentArticles(newest.slug);
+    const { next } = getAdjacentArticles(
+      newest.slug,
+      articles,
+    );
 
     expect(next).toBeUndefined();
   });
@@ -54,7 +65,10 @@ describe('getAdjacentArticles', () => {
 
 describe('related content', () => {
   it('returns up to three other articles by tag', () => {
-    const related = getRelatedArticles('personal-rag-vps');
+    const related = getRelatedArticles(
+      'personal-rag-vps',
+      articles,
+    );
 
     expect(related.length).toBeGreaterThan(0);
     expect(related.length).toBeLessThanOrEqual(3);
@@ -64,7 +78,10 @@ describe('related content', () => {
   });
 
   it('returns up to three other projects by technology', () => {
-    const related = getRelatedProjects('personal-rag-system');
+    const related = getRelatedProjects(
+      'personal-rag-system',
+      projects,
+    );
 
     expect(related.length).toBeLessThanOrEqual(3);
     expect(
@@ -75,6 +92,7 @@ describe('related content', () => {
   it('falls back to the same category when tags do not match', () => {
     const related = getRelatedProjects(
       'home-lab-infrastructure',
+      projects,
     );
 
     expect(related.every((item) => item.slug !==

@@ -112,6 +112,15 @@ def test_project_list_and_detail_mapping(api):
     assert detail['screenshots'] == []
 
 
+def test_unpublished_project_detail_is_hidden(api):
+    project = ProjectFactory.create(
+        is_published=False,
+        title='Draft project',
+    )
+    response = api.get(f'/api/v1/projects/{project.slug}/')
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
 def test_search_excludes_unpublished_and_matches_fields(api):
     tag = TagFactory.create(name='homelab')
     visible = PostFactory.create(

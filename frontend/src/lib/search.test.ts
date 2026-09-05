@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { articles } from '@/test/fixtures/articles';
+import { projects } from '@/test/fixtures/projects';
 import {
   buildSearchItems,
   moveSearchIndex,
@@ -6,7 +8,7 @@ import {
 } from '@/lib/search';
 
 describe('searchItems', () => {
-  const items = buildSearchItems();
+  const items = buildSearchItems(articles, projects);
 
   it('includes articles, projects, and navigation', () => {
     const types = new Set(items.map((item) => item.group));

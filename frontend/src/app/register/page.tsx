@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import { useAuth } from '@/components/auth/AuthContext';
+import { TurnstileWidget } from '@/components/auth/TurnstileWidget';
 import { ApiError } from '@/lib/api/client';
 
 export default function RegisterPage() {
@@ -13,6 +14,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
   const [error, setError] = useState('');
 
   async function onSubmit(event: FormEvent) {
@@ -25,6 +27,7 @@ export default function RegisterPage() {
         email,
         password,
         passwordConfirm,
+        turnstileToken,
       });
       router.push('/');
     } catch (caught) {
@@ -88,6 +91,7 @@ export default function RegisterPage() {
             required
           />
         </label>
+        <TurnstileWidget onToken={setTurnstileToken} />
         {error ? <p className='auth-error'>{error}</p> : null}
         <button type='submit' className='auth-submit'>
           Create account

@@ -29,6 +29,18 @@ const nextConfig: NextConfig = {
         source: '/media/:path*',
         destination: `${djangoOrigin}/media/:path*`,
       },
+      {
+        source: '/admin',
+        destination: `${djangoOrigin}/admin/`,
+      },
+      {
+        source: '/admin/:path*',
+        destination: `${djangoOrigin}/admin/:path*`,
+      },
+      {
+        source: '/static/:path*',
+        destination: `${djangoOrigin}/static/:path*`,
+      },
     ];
   },
 };

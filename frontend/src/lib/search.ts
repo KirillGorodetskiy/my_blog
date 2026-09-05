@@ -1,5 +1,3 @@
-import { articles } from '@/data/articles';
-import { projects } from '@/data/projects';
 import type { Article, Project } from '@/data/types';
 
 export type SearchGroup =
@@ -47,8 +45,8 @@ export const NAVIGATION: SearchItem[] = [
 ];
 
 export function buildSearchItems(
-  articleItems: Article[] = articles,
-  projectItems: Project[] = projects,
+  articleItems: Article[],
+  projectItems: Project[],
 ): SearchItem[] {
   const mappedArticles = articleItems.map((article) => ({
     group: 'Articles' as const,

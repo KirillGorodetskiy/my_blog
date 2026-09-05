@@ -1,10 +1,14 @@
 from http import HTTPStatus
 
 import pytest
+from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
 from blog.models import Comment, CommentStatus, ModerationTerm
 from blog.tests.factories import PostFactory, ProjectFactory
+
+
+User = get_user_model()
 
 
 pytestmark = pytest.mark.django_db
@@ -40,6 +44,41 @@ def test_comment_list_works_without_trailing_slash(
     )
     assert response.status_code == HTTPStatus.OK
     assert response.json() == []
+
+
+def test_comment_can_delete_is_owner_or_superuser(
+    api,
+    non_superuser,
+    superuser,
+    published_post,
+):
+    comment = Comment.objects.create(
+        author=non_superuser,
+        post=published_post,
+        body='Owned',
+        status=CommentStatus.APPROVED,
+    )
+    path = f'/api/v1/articles/{published_post.slug}/comments/'
+    anon = api.get(path).json()[0]
+    assert anon['canDelete'] is False
+
+    api.force_login(non_superuser)
+    owner = api.get(path).json()[0]
+    assert owner['id'] == comment.pk
+    assert owner['canDelete'] is True
+
+    other = User.objects.create_user(
+        username='other',
+        email='other@example.com',
+        password='SafePass123!',
+    )
+    api.force_login(other)
+    stranger = api.get(path).json()[0]
+    assert stranger['canDelete'] is False
+
+    api.force_login(superuser)
+    admin = api.get(path).json()[0]
+    assert admin['canDelete'] is True
 
 
 def test_anonymous_cannot_comment(api, published_post):
@@ -205,6 +244,9 @@ def test_rate_limit_blocks_extra_comments(
     )
     assert first.status_code == HTTPStatus.CREATED
     assert second.status_code == HTTPStatus.TOO_MANY_REQUESTS
+    assert Comment.objects.filter(
+        author=non_superuser,
+    ).count() == 1
 
 
 def test_comment_requires_exactly_one_target(non_superuser):

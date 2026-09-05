@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ProjectCard } from '@/components/projects/ProjectCard';
-import { projects } from '@/data/projects';
+import { projects } from '@/test/fixtures/projects';
 
 describe('ProjectCard', () => {
   it('links to the project detail route', () => {

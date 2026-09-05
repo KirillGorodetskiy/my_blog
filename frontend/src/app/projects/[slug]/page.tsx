@@ -32,7 +32,7 @@ export default async function ProjectDetailPage({
   }
 
   const projects = await listProjects();
-  const related = getRelatedProjects(project.slug, 3, projects);
+  const related = getRelatedProjects(project.slug, projects, 3);
 
   return (
     <>

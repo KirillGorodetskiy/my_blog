@@ -6,6 +6,7 @@ export interface CommentItem {
   body: string;
   createdAt: string | null;
   status: 'pending' | 'approved' | 'rejected' | 'spam';
+  canDelete: boolean;
 }
 
 export function listArticleComments(

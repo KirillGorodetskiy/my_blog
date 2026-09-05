@@ -7,6 +7,7 @@ import { ApiError } from '@/lib/api/client';
 import {
   createArticleComment,
   createProjectComment,
+  deleteComment,
   listArticleComments,
   listProjectComments,
   type CommentItem,
@@ -68,6 +69,28 @@ export function CommentSection({
     }
   }
 
+  async function onDelete(comment: CommentItem) {
+    const confirmed = window.confirm(
+      'Delete this comment?',
+    );
+    if (!confirmed) {
+      return;
+    }
+    setError('');
+    try {
+      await deleteComment(comment.id);
+      setComments((current) =>
+        current.filter((item) => item.id !== comment.id),
+      );
+    } catch (caught) {
+      setError(
+        caught instanceof ApiError
+          ? caught.message
+          : 'Could not delete the comment.',
+      );
+    }
+  }
+
   return (
     <section className='comment-block'>
       <h2 className='comment-title'>Comments</h2>
@@ -88,6 +111,17 @@ export function CommentSection({
                 ) : null}
               </p>
               <p className='comment-body'>{comment.body}</p>
+              {comment.canDelete ? (
+                <button
+                  type='button'
+                  className='auth-link comment-delete'
+                  onClick={() => {
+                    void onDelete(comment);
+                  }}
+                >
+                  Delete
+                </button>
+              ) : null}
             </li>
           ))}
         </ul>

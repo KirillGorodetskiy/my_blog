@@ -1,7 +1,10 @@
 from django.contrib.auth import login, logout
 from django.db.models import Q, QuerySet
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import (
+    csrf_protect,
+    ensure_csrf_cookie,
+)
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import (
@@ -11,8 +14,10 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from blog.api.auth import auth_payload
 from blog.comments import (
     apply_moderation,
+    can_delete_comment,
     enforce_comment_rate,
     reject_duplicate,
     validate_comment_body,
@@ -34,13 +39,6 @@ from blog.api.serializers import (
     SearchArticleSerializer,
     SearchProjectSerializer,
 )
-
-
-def client_ip(request) -> str:
-    forwarded = request.META.get('HTTP_X_FORWARDED_FOR', '')
-    if forwarded:
-        return forwarded.split(',')[0].strip()
-    return request.META.get('REMOTE_ADDR', 'unknown')
 
 
 def published_posts() -> QuerySet[Post]:
@@ -139,20 +137,12 @@ class MeView(APIView):
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
-        user = request.user
-        payload = {
-            'isAuthenticated': user.is_authenticated,
-            'username': (
-                user.username if user.is_authenticated else None
-            ),
-            'email': user.email if user.is_authenticated else None,
-            'isSuperuser': bool(
-                user.is_authenticated and user.is_superuser
-            ),
-        }
-        return Response(MeSerializer(payload).data)
+        return Response(
+            MeSerializer(auth_payload(request.user)).data,
+        )
 
 
+@method_decorator(csrf_protect, name='dispatch')
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -162,16 +152,12 @@ class RegisterView(APIView):
         user = serializer.save()
         login(request, user)
         return Response(
-            {
-                'isAuthenticated': True,
-                'username': user.username,
-                'email': user.email,
-                'isSuperuser': user.is_superuser,
-            },
+            auth_payload(user),
             status=status.HTTP_201_CREATED,
         )
 
 
+@method_decorator(csrf_protect, name='dispatch')
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -179,13 +165,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         login(request, serializer.validated_data['user'])
-        user = request.user
-        return Response({
-            'isAuthenticated': True,
-            'username': user.username,
-            'email': user.email,
-            'isSuperuser': user.is_superuser,
-        })
+        return Response(auth_payload(request.user))
 
 
 class LogoutView(APIView):
@@ -205,7 +185,11 @@ class ArticleCommentListView(APIView):
             status=CommentStatus.APPROVED,
         )
         return Response(
-            CommentSerializer(comments, many=True).data,
+            CommentSerializer(
+                comments,
+                many=True,
+                context={'request': request},
+            ).data,
         )
 
     def post(self, request, slug: str):
@@ -234,7 +218,11 @@ class ProjectCommentListView(APIView):
             status=CommentStatus.APPROVED,
         )
         return Response(
-            CommentSerializer(comments, many=True).data,
+            CommentSerializer(
+                comments,
+                many=True,
+                context={'request': request},
+            ).data,
         )
 
     def post(self, request, slug: str):
@@ -259,8 +247,7 @@ class CommentDeleteView(APIView):
 
     def delete(self, request, pk: int):
         comment = get_object_or_404(Comment, pk=pk)
-        owner = comment.author_id == request.user.id
-        if not owner and not request.user.is_superuser:
+        if not can_delete_comment(request.user, comment):
             return Response(
                 {'detail': 'Not allowed.'},
                 status=status.HTTP_403_FORBIDDEN,
@@ -280,13 +267,14 @@ def _create_comment(request, post, project):
                 'body': serializer.validated_data['body'],
                 'createdAt': None,
                 'status': CommentStatus.PENDING,
+                'canDelete': False,
             },
             status=status.HTTP_201_CREATED,
         )
     body = validate_comment_body(
         serializer.validated_data['body'],
     )
-    enforce_comment_rate(request.user.id, client_ip(request))
+    enforce_comment_rate(request.user.id)
     reject_duplicate(
         request.user.id,
         body,
@@ -303,6 +291,9 @@ def _create_comment(request, post, project):
         moderation_reason=reason,
     )
     return Response(
-        CommentSerializer(comment).data,
+        CommentSerializer(
+            comment,
+            context={'request': request},
+        ).data,
         status=status.HTTP_201_CREATED,
     )
