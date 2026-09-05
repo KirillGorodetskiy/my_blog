@@ -5,20 +5,20 @@ type EnterExit = (options: {
   difference: number;
   compact: boolean;
   reduced: boolean;
-}) => { x: number; opacity: number };
+}) => { x: number; opacity: number; y?: number };
 
 describe('pageVariants', () => {
-  it('brings articles in from the left', () => {
+  it('fades the incoming page without a slide', () => {
     const enter = pageVariants.enter as EnterExit;
-    const exit = pageVariants.exit as EnterExit;
     const options = {
       difference: -1,
       compact: false,
       reduced: false,
     };
 
-    expect(enter(options).x).toBeLessThan(0);
-    expect(exit(options).x).toBeGreaterThan(0);
+    expect(enter(options).x).toBe(0);
+    expect(enter(options).opacity).toBe(0);
+    expect(enter(options).y).toBe(8);
   });
 
   it('fades without a slide on first load or about', () => {
@@ -33,16 +33,9 @@ describe('pageVariants', () => {
     expect(enter(options).opacity).toBe(0);
   });
 
-  it('brings projects in from the right', () => {
-    const enter = pageVariants.enter as EnterExit;
-    const exit = pageVariants.exit as EnterExit;
-    const options = {
-      difference: 1,
-      compact: false,
-      reduced: false,
-    };
+  it('keeps the exit variant in document flow', () => {
+    const exit = pageVariants.exit as { position?: string };
 
-    expect(enter(options).x).toBeGreaterThan(0);
-    expect(exit(options).x).toBeLessThan(0);
+    expect(exit.position).toBeUndefined();
   });
 });

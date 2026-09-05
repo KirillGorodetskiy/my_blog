@@ -25,10 +25,19 @@ const ROLE_CLASS: Record<MediaRole, string> = {
   'article-screenshot': 'article-screenshot',
 };
 
-const BOXED_ROLES: MediaRole[] = [
-  'project-thumbnail',
-  'article-hero',
-];
+const ROLE_FIT: Record<MediaRole, 'object-cover' | 'object-contain'> = {
+  'project-thumbnail': 'object-contain',
+  'article-hero': 'object-cover',
+  'article-content-image': 'object-contain',
+  'article-screenshot': 'object-contain',
+};
+
+export const ROLE_SIZES: Record<MediaRole, string> = {
+  'project-thumbnail': '(min-width: 768px) 40vw, 100vw',
+  'article-hero': '(min-width: 1280px) 48rem, 100vw',
+  'article-content-image': '(min-width: 1280px) 48rem, 100vw',
+  'article-screenshot': '(min-width: 768px) 40vw, 100vw',
+};
 
 function joinClasses(...parts: Array<string | undefined>) {
   return parts.filter(Boolean).join(' ');
@@ -45,6 +54,16 @@ export function hasUsableMediaSrc(src: string): boolean {
     value.startsWith('/') ||
     value.startsWith('https://') ||
     value.startsWith('http://')
+  );
+}
+
+export function bypassesImageOptimizer(src: string): boolean {
+  const value = src.trim();
+
+  return (
+    value.startsWith('/media/') ||
+    value.startsWith('http://') ||
+    value.startsWith('https://')
   );
 }
 
@@ -68,22 +87,6 @@ export function ContentMedia({
     );
   }
 
-  if (!BOXED_ROLES.includes(role)) {
-    return (
-      <img
-        src={src}
-        alt={label}
-        className={joinClasses(roleClass, className)}
-        onError={() => setFailed(true)}
-      />
-    );
-  }
-
-  const fitClass =
-    role === 'project-thumbnail'
-      ? 'object-contain'
-      : 'object-cover';
-
   return (
     <div
       className={joinClasses(
@@ -96,8 +99,9 @@ export function ContentMedia({
         src={src}
         alt={label}
         fill
-        unoptimized
-        className={fitClass}
+        sizes={ROLE_SIZES[role]}
+        unoptimized={bypassesImageOptimizer(src)}
+        className={ROLE_FIT[role]}
         style={
           objectPosition ? { objectPosition } : undefined
         }

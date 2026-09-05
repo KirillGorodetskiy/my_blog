@@ -13,7 +13,7 @@ export interface VariantOptions {
 
 function layerShift(
   options: VariantOptions,
-  layer: 'page' | 'hero' | 'text',
+  layer: 'hero' | 'text',
 ): number {
   return getLayerDistance(
     options.difference,
@@ -21,14 +21,6 @@ function layerShift(
     options.compact,
     options.reduced,
   );
-}
-
-function pageScale(options: VariantOptions): number {
-  if (options.reduced || options.difference === 0) {
-    return 1;
-  }
-
-  return 0.995;
 }
 
 function heroScale(options: VariantOptions): number {
@@ -45,53 +37,44 @@ function heroScale(options: VariantOptions): number {
 
 export const pageVariants: Variants = {
   enter: (options: VariantOptions) => ({
-    x: layerShift(options, 'page'),
     opacity: 0,
-    scale: pageScale(options),
+    y: options.reduced ? 0 : 8,
+    x: 0,
+    scale: 1,
   }),
   center: {
-    x: 0,
     opacity: 1,
+    y: 0,
+    x: 0,
     scale: 1,
-    position: 'relative',
   },
-  exit: (options: VariantOptions) => ({
-    x: -layerShift(options, 'page'),
+  exit: {
     opacity: 0,
-    scale: pageScale(options),
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    pointerEvents: 'none',
-  }),
+    y: 0,
+    x: 0,
+    scale: 1,
+  },
 };
 
 export const heroArtVariants: Variants = {
   enter: (options: VariantOptions) => ({
-    x:
-      layerShift(options, 'hero') - layerShift(options, 'page'),
+    x: layerShift(options, 'hero'),
     scale: heroScale(options),
   }),
   center: { x: 0, scale: 1 },
   exit: (options: VariantOptions) => ({
-    x: -(
-      layerShift(options, 'hero') - layerShift(options, 'page')
-    ),
+    x: -layerShift(options, 'hero'),
     scale: heroScale(options),
   }),
 };
 
 export const heroTextVariants: Variants = {
   enter: (options: VariantOptions) => ({
-    x:
-      layerShift(options, 'text') - layerShift(options, 'page'),
+    x: layerShift(options, 'text'),
   }),
   center: { x: 0 },
   exit: (options: VariantOptions) => ({
-    x: -(
-      layerShift(options, 'text') - layerShift(options, 'page')
-    ),
+    x: -layerShift(options, 'text'),
   }),
 };
 

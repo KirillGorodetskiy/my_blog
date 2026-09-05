@@ -156,9 +156,11 @@ describe('MarkdownContent', () => {
     });
 
     expect(container.querySelector('.article-figure')).not.toBeNull();
-    expect(image).toHaveClass('article-content-image');
+    expect(
+      container.querySelector('.article-content-image'),
+    ).not.toBeNull();
+    expect(image).toHaveClass('object-contain');
     expect(image).not.toHaveClass('object-cover');
-    expect(container.querySelector('.aspect-\\[16\\/9\\]')).toBeNull();
   });
 
   it('renders a configured https image as a plain img', () => {

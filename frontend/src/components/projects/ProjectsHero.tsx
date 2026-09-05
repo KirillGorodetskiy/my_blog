@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { SceneHeroArt } from '@/components/hero/SceneHeroArt';
 import {
   HeroArtwork,
   HeroCopy,
@@ -13,18 +13,13 @@ export function ProjectsHero() {
     >
       <div className='scene-hero-art-wrap'>
         <HeroArtwork>
-          <Image
+          <SceneHeroArt
             src='/images/projects-hero.jpg'
             alt={
               'A man works at a night workshop desk with a ' +
               'laptop, a robotic arm, and a glowing model, ' +
               'mountains visible through the windows.'
             }
-            width={1024}
-            height={438}
-            unoptimized
-            priority
-            className='scene-hero-art h-auto w-full'
           />
         </HeroArtwork>
       </div>
@@ -49,8 +44,8 @@ export function ProjectsHero() {
       >
         <h1
           className={
-            'font-serif text-5xl tracking-tight text-[#edf3ef] ' +
-            'md:text-6xl'
+            'scene-hero-title font-serif tracking-tight ' +
+            'text-[#edf3ef]'
           }
         >
           Projects

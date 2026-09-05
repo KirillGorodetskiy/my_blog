@@ -45,7 +45,6 @@ export interface RoomTransitionState {
   reduced: boolean;
   isClient: boolean;
   isTransitioning: boolean;
-  exitGhost: string | null;
   markSettled: () => void;
 }
 
@@ -62,36 +61,22 @@ export function TransitionProvider({
   const compact = useCompactViewport();
   const isClient = useIsClient();
   const [previousPath, setPreviousPath] = useState(pathname);
-  const [difference, setDifference] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [exitGhost, setExitGhost] = useState<string | null>(null);
-
-  if (pathname !== previousPath) {
-    const main = document.getElementById('main-content');
-    const ghost = main ? main.innerHTML : null;
-
-    setPreviousPath(pathname);
-    setDifference(getRoomDifference(previousPath, pathname));
-    setIsTransitioning(true);
-    setExitGhost(ghost);
-  }
+  const isTransitioning = previousPath !== pathname;
 
   const markSettled = useCallback(() => {
-    setIsTransitioning(false);
-    setExitGhost(null);
-  }, []);
+    setPreviousPath(pathname);
+  }, [pathname]);
 
   return (
     <RoomTransitionContext.Provider
       value={{
         pathname,
         previousPath,
-        difference,
+        difference: getRoomDifference(previousPath, pathname),
         compact,
         reduced,
         isClient,
         isTransitioning,
-        exitGhost,
         markSettled,
       }}
     >

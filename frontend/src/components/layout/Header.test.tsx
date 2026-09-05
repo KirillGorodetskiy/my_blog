@@ -90,4 +90,20 @@ describe('Header', () => {
       screen.getByRole('button', { name: 'Open menu' }),
     ).toBeInTheDocument();
   });
+
+  it('keeps the full header behind the xl breakpoint', () => {
+    render(
+      <AuthProvider>
+        <SearchProvider>
+          <Header />
+        </SearchProvider>
+      </AuthProvider>,
+    );
+
+    expect(screen.getByRole('navigation', { name: 'Primary' }))
+      .toHaveClass('xl:flex');
+    expect(
+      screen.getByRole('button', { name: 'Open menu' }),
+    ).toHaveClass('xl:hidden');
+  });
 });

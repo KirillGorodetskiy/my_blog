@@ -92,9 +92,9 @@ describe('ProjectDetail', () => {
       name: 'Settings screen',
     });
 
-    expect(cover).toHaveClass('article-content-image');
+    expect(cover).toHaveClass('object-contain');
     expect(cover).not.toHaveClass('object-cover');
-    expect(shot).toHaveClass('article-screenshot');
+    expect(shot).toHaveClass('object-contain');
     expect(shot).not.toHaveClass('object-cover');
   });
 });
