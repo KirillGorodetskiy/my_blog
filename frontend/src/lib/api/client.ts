@@ -59,6 +59,17 @@ export function readCsrfToken(): string {
   return match ? decodeURIComponent(match[1]) : '';
 }
 
+export async function ensureCsrfToken(): Promise<string> {
+  const existing = readCsrfToken();
+
+  if (existing) {
+    return existing;
+  }
+
+  await fetchJson('/api/v1/auth/me/');
+  return readCsrfToken();
+}
+
 interface FetchJsonOptions extends RequestInit {
   parse?: boolean;
 }
@@ -90,6 +101,13 @@ export async function fetchJson<T>(
       (typeof window === 'undefined' ? 'omit' : 'include'),
     cache: init.cache ?? 'no-store',
   });
+
+  if (init.signal?.aborted) {
+    throw new DOMException(
+      'The operation was aborted.',
+      'AbortError',
+    );
+  }
 
   if (!response.ok) {
     let detail = response.statusText;

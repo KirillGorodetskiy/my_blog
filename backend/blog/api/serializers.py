@@ -39,19 +39,28 @@ def split_lines(value: str) -> list[str]:
     ]
 
 
-def staff_change_url(serializer, viewname: str, pk: int):
+def tag_names(obj: Post) -> list[str]:
+    return [tag.name for tag in obj.tag.all()]
+
+
+def staff_change_url(
+    serializer,
+    viewname: str,
+    pk: int,
+    perm: str,
+):
     request = serializer.context.get('request')
     user = getattr(request, 'user', None)
     if (
         user is None
         or not user.is_authenticated
-        or not user.is_staff
+        or not user.has_perm(perm)
     ):
         return None
     return reverse(viewname, args=[pk])
 
 
-class ArticleSerializer(serializers.ModelSerializer):
+class ArticleListSerializer(serializers.ModelSerializer):
     category = serializers.CharField(source='category.name')
     date = serializers.SerializerMethodField()
     readTimeMinutes = serializers.SerializerMethodField()
@@ -59,7 +68,6 @@ class ArticleSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     featured = serializers.BooleanField()
     tags = serializers.SerializerMethodField()
-    body = serializers.CharField()
     adminUrl = serializers.SerializerMethodField()
 
     class Meta:
@@ -74,7 +82,6 @@ class ArticleSerializer(serializers.ModelSerializer):
             'image',
             'featured',
             'tags',
-            'body',
             'adminUrl',
         )
 
@@ -89,14 +96,28 @@ class ArticleSerializer(serializers.ModelSerializer):
         return media_url(obj.image)
 
     def get_tags(self, obj: Post) -> list[str]:
-        return list(obj.tag.values_list('name', flat=True))
+        return tag_names(obj)
 
     def get_adminUrl(self, obj: Post) -> str | None:
         return staff_change_url(
             self,
             'admin:blog_post_change',
             obj.pk,
+            'blog.change_post',
         )
+
+
+class ArticleDetailSerializer(ArticleListSerializer):
+    body = serializers.CharField()
+
+    class Meta(ArticleListSerializer.Meta):
+        fields = ArticleListSerializer.Meta.fields + (
+            'body',
+        )
+
+
+class ArticleSerializer(ArticleDetailSerializer):
+    pass
 
 
 class ScreenshotSerializer(serializers.ModelSerializer):
@@ -110,25 +131,13 @@ class ScreenshotSerializer(serializers.ModelSerializer):
         return media_url(obj.image)
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ProjectListSerializer(serializers.ModelSerializer):
     category = serializers.CharField()
     description = serializers.CharField()
     image = serializers.SerializerMethodField()
     featured = serializers.BooleanField()
     status = serializers.CharField()
     technologies = serializers.SerializerMethodField()
-    problem = serializers.CharField()
-    solution = serializers.CharField()
-    architecture = serializers.CharField()
-    workflow = serializers.CharField()
-    integrations = serializers.CharField()
-    failureHandling = serializers.CharField(
-        source='failure_handling',
-    )
-    screenshots = ScreenshotSerializer(many=True)
-    lessons = serializers.SerializerMethodField()
-    githubUrl = serializers.SerializerMethodField()
-    demoUrl = serializers.SerializerMethodField()
     adminUrl = serializers.SerializerMethodField()
 
     class Meta:
@@ -142,6 +151,40 @@ class ProjectSerializer(serializers.ModelSerializer):
             'featured',
             'status',
             'technologies',
+            'adminUrl',
+        )
+
+    def get_image(self, obj: Project) -> str:
+        return media_url(obj.image)
+
+    def get_technologies(self, obj: Project) -> list[str]:
+        return split_csv(obj.technologies)
+
+    def get_adminUrl(self, obj: Project) -> str | None:
+        return staff_change_url(
+            self,
+            'admin:blog_project_change',
+            obj.pk,
+            'blog.change_project',
+        )
+
+
+class ProjectDetailSerializer(ProjectListSerializer):
+    problem = serializers.CharField()
+    solution = serializers.CharField()
+    architecture = serializers.CharField()
+    workflow = serializers.CharField()
+    integrations = serializers.CharField()
+    failureHandling = serializers.CharField(
+        source='failure_handling',
+    )
+    screenshots = ScreenshotSerializer(many=True)
+    lessons = serializers.SerializerMethodField()
+    githubUrl = serializers.SerializerMethodField()
+    demoUrl = serializers.SerializerMethodField()
+
+    class Meta(ProjectListSerializer.Meta):
+        fields = ProjectListSerializer.Meta.fields + (
             'problem',
             'solution',
             'architecture',
@@ -152,14 +195,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             'lessons',
             'githubUrl',
             'demoUrl',
-            'adminUrl',
         )
-
-    def get_image(self, obj: Project) -> str:
-        return media_url(obj.image)
-
-    def get_technologies(self, obj: Project) -> list[str]:
-        return split_csv(obj.technologies)
 
     def get_lessons(self, obj: Project) -> list[str]:
         return split_lines(obj.lessons)
@@ -170,12 +206,9 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_demoUrl(self, obj: Project) -> str | None:
         return obj.live_link or None
 
-    def get_adminUrl(self, obj: Project) -> str | None:
-        return staff_change_url(
-            self,
-            'admin:blog_project_change',
-            obj.pk,
-        )
+
+class ProjectSerializer(ProjectDetailSerializer):
+    pass
 
 
 class SearchArticleSerializer(serializers.ModelSerializer):
@@ -188,7 +221,7 @@ class SearchArticleSerializer(serializers.ModelSerializer):
         fields = ('slug', 'title', 'excerpt', 'category', 'tags')
 
     def get_tags(self, obj: Post) -> list[str]:
-        return list(obj.tag.values_list('name', flat=True))
+        return tag_names(obj)
 
 
 class SearchProjectSerializer(serializers.ModelSerializer):
@@ -247,7 +280,10 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     passwordConfirm = serializers.CharField(write_only=True)
-    turnstileToken = serializers.CharField(write_only=True)
+    turnstileToken = serializers.CharField(
+        write_only=True,
+        allow_blank=True,
+    )
 
     def validate_username(self, value: str) -> str:
         if User.objects.filter(username__iexact=value).exists():
@@ -266,12 +302,17 @@ class RegisterSerializer(serializers.Serializer):
     def validate(self, attrs):
         from blog.turnstile import verify_turnstile
 
-        verify_turnstile(attrs.pop('turnstileToken'))
+        token = attrs.pop('turnstileToken')
         if attrs['password'] != attrs['passwordConfirm']:
             raise serializers.ValidationError(
                 {'passwordConfirm': 'Passwords do not match.'},
             )
         validate_password(attrs['password'])
+        if not token:
+            raise serializers.ValidationError(
+                {'turnstileToken': 'Turnstile token is required.'},
+            )
+        verify_turnstile(token)
         return attrs
 
     def create(self, validated_data):

@@ -118,7 +118,6 @@ class ProjectAdmin(admin.ModelAdmin):
                 'slug',
                 'category',
                 'status',
-                'icon',
             ),
         }),
         ('Publication', {

@@ -23,9 +23,11 @@ export interface SearchResponse {
 
 export function searchContent(
   query: string,
+  init: RequestInit = {},
 ): Promise<SearchResponse> {
   const params = new URLSearchParams({ q: query });
   return fetchJson<SearchResponse>(
     `/api/v1/search/?${params.toString()}`,
+    init,
   );
 }

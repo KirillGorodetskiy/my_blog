@@ -1,5 +1,6 @@
 import type { SearchResponse } from '@/lib/api/search';
 import type { SearchItem } from '@/lib/search';
+import { projectCardSummary } from '@/lib/markdown';
 import { NAVIGATION } from '@/lib/search';
 
 export function searchHitsToItems(
@@ -21,7 +22,7 @@ export function searchHitsToItems(
     group: 'Projects' as const,
     title: project.title,
     href: `/projects/${project.slug}`,
-    detail: project.description,
+    detail: projectCardSummary(project.description),
     haystack: [
       project.title,
       project.description,

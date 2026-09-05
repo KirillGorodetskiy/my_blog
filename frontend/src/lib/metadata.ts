@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { Article, Project } from '@/data/types';
+import { extractProjectOverview } from '@/lib/markdown';
 import { SITE_NAME } from '@/lib/site';
 
 export function absoluteTitle(title: string): string {
@@ -33,11 +34,11 @@ export function projectMetadata(project: Project): Metadata {
 
   return {
     title: { absolute: absoluteTitle(project.title) },
-    description: project.description,
+    description: extractProjectOverview(project.description),
     alternates: { canonical: url },
     openGraph: {
       title: project.title,
-      description: project.description,
+      description: extractProjectOverview(project.description),
       type: 'website',
       url,
       images: [{ url: '/images/projects-hero.jpg' }],
@@ -45,7 +46,7 @@ export function projectMetadata(project: Project): Metadata {
     twitter: {
       card: 'summary_large_image',
       title: project.title,
-      description: project.description,
+      description: extractProjectOverview(project.description),
     },
   };
 }

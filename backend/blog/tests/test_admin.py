@@ -3,6 +3,7 @@ from http import HTTPStatus
 import pytest
 from django.contrib.admin.sites import site
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from django.test import Client
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -151,7 +152,23 @@ def test_moderation_term_admin_is_registered():
     assert 'is_active' in admin.list_filter
 
 
-def test_article_admin_url_is_staff_only(api):
+def _staff_user(username: str, perms: tuple[str, ...] = ()):
+    user = User.objects.create_user(
+        username=username,
+        email=f'{username}@example.com',
+        password='SafePass123!',
+        is_staff=True,
+    )
+    if perms:
+        permission_objs = Permission.objects.filter(
+            codename__in=perms,
+            content_type__app_label='blog',
+        )
+        user.user_permissions.add(*permission_objs)
+    return user
+
+
+def test_article_admin_url_requires_change_post(api):
     post = PostFactory.create(
         title='Staff edit note',
         is_published=True,
@@ -160,7 +177,8 @@ def test_article_admin_url_is_staff_only(api):
         'admin:blog_post_change',
         args=[post.pk],
     )
-    anonymous = api.get(f'/api/v1/articles/{post.slug}/')
+    path = f'/api/v1/articles/{post.slug}/'
+    anonymous = api.get(path)
     assert anonymous.status_code == HTTPStatus.OK
     assert anonymous.json()['adminUrl'] is None
 
@@ -170,16 +188,31 @@ def test_article_admin_url_is_staff_only(api):
         password='SafePass123!',
     )
     api.force_login(reader)
-    public = api.get(f'/api/v1/articles/{post.slug}/')
-    assert public.json()['adminUrl'] is None
+    assert api.get(path).json()['adminUrl'] is None
 
-    reader.is_staff = True
-    reader.save(update_fields=['is_staff'])
-    staff = api.get(f'/api/v1/articles/{post.slug}/')
-    assert staff.json()['adminUrl'] == change_url
+    staff = _staff_user('moderator')
+    api.force_login(staff)
+    assert api.get(path).json()['adminUrl'] is None
+
+    editor = _staff_user('editor', ('change_post',))
+    api.force_login(editor)
+    assert api.get(path).json()['adminUrl'] == change_url
 
 
-def test_project_admin_url_is_staff_only(api):
+def test_article_admin_url_for_superuser(api, superuser):
+    post = PostFactory.create(
+        title='Superuser note',
+        is_published=True,
+    )
+    api.force_login(superuser)
+    payload = api.get(f'/api/v1/articles/{post.slug}/').json()
+    assert payload['adminUrl'] == reverse(
+        'admin:blog_post_change',
+        args=[post.pk],
+    )
+
+
+def test_project_admin_url_requires_change_project(api):
     project = ProjectFactory.create(
         title='Staff edit project',
         is_published=True,
@@ -188,15 +221,28 @@ def test_project_admin_url_is_staff_only(api):
         'admin:blog_project_change',
         args=[project.pk],
     )
-    anonymous = api.get(f'/api/v1/projects/{project.slug}/')
-    assert anonymous.json()['adminUrl'] is None
+    path = f'/api/v1/projects/{project.slug}/'
+    assert api.get(path).json()['adminUrl'] is None
 
-    staff = User.objects.create_user(
-        username='proj-editor',
-        email='proj-editor@example.com',
-        password='SafePass123!',
-        is_staff=True,
-    )
+    staff = _staff_user('proj-moderator')
     api.force_login(staff)
-    response = api.get(f'/api/v1/projects/{project.slug}/')
-    assert response.json()['adminUrl'] == change_url
+    assert api.get(path).json()['adminUrl'] is None
+
+    editor = _staff_user('proj-editor', ('change_project',))
+    api.force_login(editor)
+    assert api.get(path).json()['adminUrl'] == change_url
+
+
+def test_project_admin_url_for_superuser(api, superuser):
+    project = ProjectFactory.create(
+        title='Superuser project',
+        is_published=True,
+    )
+    api.force_login(superuser)
+    payload = api.get(
+        f'/api/v1/projects/{project.slug}/',
+    ).json()
+    assert payload['adminUrl'] == reverse(
+        'admin:blog_project_change',
+        args=[project.pk],
+    )

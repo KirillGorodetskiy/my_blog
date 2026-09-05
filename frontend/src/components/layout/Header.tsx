@@ -108,9 +108,6 @@ export function Header() {
           >
             <Search size={18} strokeWidth={1.6} />
           </button>
-          <div className='md:hidden'>
-            <AuthControls compact />
-          </div>
           <div className='hidden md:block'>
             <AuthControls />
           </div>

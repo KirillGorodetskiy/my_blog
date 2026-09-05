@@ -1,6 +1,8 @@
 from http import HTTPStatus
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
 from blog.models import Comment, CommentStatus
@@ -76,6 +78,42 @@ def test_article_category_uses_admin_managed_name(api):
     assert response.json()['category'] == 'Hardware'
 
 
+def test_article_list_omits_body(api):
+    post = PostFactory.create(
+        title='List only',
+        is_published=True,
+        body='Full article body stays on detail.',
+        excerpt='Short',
+    )
+    listing = api.get('/api/v1/articles/').json()
+    item = next(
+        entry for entry in listing if entry['slug'] == post.slug
+    )
+    assert 'body' not in item
+    assert item['excerpt'] == 'Short'
+
+    detail = api.get(f'/api/v1/articles/{post.slug}/').json()
+    assert detail['body'] == post.body
+
+
+def test_article_list_uses_prefetched_tags(api):
+    for index in range(3):
+        post = PostFactory.create(
+            is_published=True,
+            title=f'Tagged list {index}',
+        )
+        post.tag.add(TagFactory.create(name=f'tag-{index}'))
+    with CaptureQueriesContext(connection) as ctx:
+        api.get('/api/v1/articles/')
+    tag_sql = [
+        query['sql']
+        for query in ctx.captured_queries
+        if 'blog_tag' in query['sql'].lower()
+        or 'blog_post_tag' in query['sql'].lower()
+    ]
+    assert len(tag_sql) <= 2
+
+
 def test_article_serializer_maps_tags(api):
     tag = TagFactory.create(name='django')
     post = PostFactory.create(
@@ -122,6 +160,25 @@ def test_project_list_and_detail_mapping(api):
         'Test first',
     ]
     assert detail['screenshots'] == []
+
+    listed = next(
+        item
+        for item in listing.json()
+        if item['slug'] == project.slug
+    )
+    for field in (
+        'problem',
+        'solution',
+        'architecture',
+        'workflow',
+        'integrations',
+        'failureHandling',
+        'screenshots',
+        'lessons',
+        'githubUrl',
+        'demoUrl',
+    ):
+        assert field not in listed
 
 
 def test_unpublished_project_detail_is_hidden(api):

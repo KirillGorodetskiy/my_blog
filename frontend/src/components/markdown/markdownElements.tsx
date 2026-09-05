@@ -4,7 +4,7 @@ import { CodeBlock } from '@/components/article/CodeBlock';
 import { HeadingBlock } from '@/components/article/HeadingBlock';
 import { ContentMedia } from '@/components/ui/ContentMedia';
 import { decorateChildren } from '@/components/markdown/decorateChildren';
-import { isSafeHref } from '@/lib/markdown';
+import { isSafeHref, isSafeMarkdownImage } from '@/lib/markdown';
 
 function heading(
   level: 1 | 2 | 3 | 4 | 5 | 6,
@@ -104,16 +104,16 @@ export const markdownElements: Components = {
   img: ({ src, alt }) => {
     const href = typeof src === 'string' ? src : '';
 
-    if (!href || !isSafeHref(href)) {
+    if (!href || !isSafeMarkdownImage(href)) {
       return null;
     }
 
     return (
       <figure className='article-figure'>
         <ContentMedia
+          role='article-content-image'
           src={href}
           label={alt || `Figure · ${href}`}
-          className='aspect-[16/9] w-full rounded-xl'
         />
         {alt ? (
           <figcaption className='article-caption'>

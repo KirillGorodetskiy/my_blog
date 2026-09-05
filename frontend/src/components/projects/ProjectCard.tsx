@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import type { Project } from '@/data/types';
+import type { ProjectList } from '@/data/types';
 import { MarkdownInline } from '@/components/markdown/MarkdownInline';
 import { ContentMedia } from '@/components/ui/ContentMedia';
+import { projectCardSummary } from '@/lib/markdown';
 
 interface ProjectCardProps {
-  project: Project;
+  project: ProjectList;
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
@@ -24,9 +25,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
         className='block'
       >
         <ContentMedia
+          role='project-thumbnail'
           src={project.image}
           label={`Artwork for ${project.title}`}
-          className='aspect-[16/10] w-full'
         />
         <div className='space-y-3 px-5 py-5'>
           <p
@@ -47,7 +48,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </h3>
           <p className='text-sm leading-relaxed text-[#91a09a]'>
             <MarkdownInline
-              source={project.description}
+              source={projectCardSummary(
+                project.description,
+              )}
               allowLinks={false}
             />
           </p>

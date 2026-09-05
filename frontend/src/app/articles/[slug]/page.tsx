@@ -76,6 +76,7 @@ export default async function ArticleDetailPage({
           ))}
         </ul>
         <ContentMedia
+          role='article-hero'
           src={article.image}
           label={`Artwork for ${article.title}`}
           className='article-cover'

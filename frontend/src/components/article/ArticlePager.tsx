@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import type { Article } from '@/data/types';
+import type { ArticleList } from '@/data/types';
 
 export function ArticlePager({
   previous,
   next,
 }: {
-  previous?: Article;
-  next?: Article;
+  previous?: ArticleList;
+  next?: ArticleList;
 }) {
   if (!previous && !next) {
     return null;

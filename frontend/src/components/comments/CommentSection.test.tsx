@@ -7,17 +7,19 @@ import type { CommentItem } from '@/lib/api/comments';
 const commentsState = vi.hoisted(() => ({
   items: [] as CommentItem[],
   deleteMock: vi.fn(),
+  listMock: vi.fn(),
+  user: {
+    isAuthenticated: true,
+    username: 'reader905',
+    email: 'reader905@example.com',
+    isStaff: false,
+    isSuperuser: false,
+  },
 }));
 
 vi.mock('@/components/auth/AuthContext', () => ({
   useAuth: () => ({
-    user: {
-      isAuthenticated: true,
-      username: 'reader905',
-      email: 'reader905@example.com',
-      isStaff: false,
-      isSuperuser: false,
-    },
+    user: commentsState.user,
     ready: true,
     login: vi.fn(),
     register: vi.fn(),
@@ -26,8 +28,10 @@ vi.mock('@/components/auth/AuthContext', () => ({
 }));
 
 vi.mock('@/lib/api/comments', () => ({
-  listArticleComments: async () => commentsState.items,
-  listProjectComments: async () => commentsState.items,
+  listArticleComments: (...args: unknown[]) =>
+    commentsState.listMock(...args),
+  listProjectComments: (...args: unknown[]) =>
+    commentsState.listMock(...args),
   createArticleComment: vi.fn(),
   createProjectComment: vi.fn(),
   deleteComment: (...args: unknown[]) =>
@@ -37,6 +41,14 @@ vi.mock('@/lib/api/comments', () => ({
 describe('CommentSection', () => {
   beforeEach(() => {
     commentsState.deleteMock.mockReset();
+    commentsState.listMock.mockReset();
+    commentsState.user = {
+      isAuthenticated: true,
+      username: 'reader905',
+      email: 'reader905@example.com',
+      isStaff: false,
+      isSuperuser: false,
+    };
     commentsState.items = [
       {
         id: 1,
@@ -55,6 +67,39 @@ describe('CommentSection', () => {
         canDelete: false,
       },
     ];
+    commentsState.listMock.mockResolvedValue(
+      commentsState.items,
+    );
+  });
+
+  it('shows an error instead of an empty list on failure', async () => {
+    commentsState.listMock.mockRejectedValue(
+      new Error('network'),
+    );
+    render(<CommentSection kind='article' slug='note' />);
+    expect(
+      await screen.findByText('Could not load comments.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('No comments yet.'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('reloads comments when auth identity changes', async () => {
+    const { rerender } = render(
+      <CommentSection kind='article' slug='note' />,
+    );
+    await screen.findByText('Mine to remove');
+    expect(commentsState.listMock).toHaveBeenCalledTimes(1);
+
+    commentsState.user = {
+      ...commentsState.user,
+      username: 'editor',
+      isStaff: true,
+    };
+    rerender(<CommentSection kind='article' slug='note' />);
+    await screen.findByText('Mine to remove');
+    expect(commentsState.listMock).toHaveBeenCalledTimes(2);
   });
 
   it('shows Delete only on deletable comments', async () => {

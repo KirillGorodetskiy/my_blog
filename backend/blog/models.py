@@ -134,11 +134,16 @@ class ProjectPostBase(models.Model):
 
 
 class Project(ProjectPostBase):
-    description = models.TextField()
+    description = models.TextField(
+        help_text=(
+            'Short card and hero summary. Use 1-3 '
+            'sentences. Put case-study detail in the '
+            'section fields.'
+        ),
+    )
     technologies = models.CharField(max_length=200, blank=True, null=True)
     live_link = models.URLField(max_length=200, blank=True, null=True)
     github_link = models.URLField(max_length=200, blank=True, null=True)
-    icon = models.CharField(max_length=10, default="📁", blank=True)
     category = models.CharField(
         max_length=32,
         choices=ProjectCategory.choices,

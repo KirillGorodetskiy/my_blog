@@ -58,21 +58,31 @@ export function SearchDialog() {
       return;
     }
 
-    let cancelled = false;
-    searchContent(needle)
-      .then((hits) => {
-        if (!cancelled) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      searchContent(needle, { signal: controller.signal })
+        .then((hits) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+
           setRemote(searchHitsToItems(hits));
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
+        })
+        .catch((caught: unknown) => {
+          if (
+            caught instanceof DOMException &&
+            caught.name === 'AbortError'
+          ) {
+            return;
+          }
+
           setRemote(NAVIGATION);
-        }
-      });
+        });
+    }, 250);
 
     return () => {
-      cancelled = true;
+      window.clearTimeout(timer);
+      controller.abort();
     };
   }, [query]);
 

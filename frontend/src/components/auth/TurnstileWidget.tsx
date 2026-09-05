@@ -9,8 +9,10 @@ interface TurnstileApi {
       sitekey: string;
       callback: (token: string) => void;
       'expired-callback': () => void;
+      'error-callback': () => void;
     },
   ) => string;
+  reset: (widgetId?: string) => void;
 }
 
 declare global {
@@ -21,10 +23,13 @@ declare global {
 
 export function TurnstileWidget({
   onToken,
+  resetSignal = 0,
 }: {
   onToken: (token: string) => void;
+  resetSignal?: number;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
   const siteKey =
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '';
 
@@ -34,14 +39,23 @@ export function TurnstileWidget({
     }
 
     const mount = () => {
-      if (!hostRef.current || !window.turnstile) {
+      if (
+        !hostRef.current ||
+        !window.turnstile ||
+        widgetIdRef.current
+      ) {
         return;
       }
-      window.turnstile.render(hostRef.current, {
-        sitekey: siteKey,
-        callback: onToken,
-        'expired-callback': () => onToken(''),
-      });
+
+      widgetIdRef.current = window.turnstile.render(
+        hostRef.current,
+        {
+          sitekey: siteKey,
+          callback: onToken,
+          'expired-callback': () => onToken(''),
+          'error-callback': () => onToken(''),
+        },
+      );
     };
 
     if (window.turnstile) {
@@ -56,6 +70,15 @@ export function TurnstileWidget({
     script.onload = mount;
     document.head.appendChild(script);
   }, [onToken, siteKey]);
+
+  useEffect(() => {
+    if (!resetSignal || !widgetIdRef.current) {
+      return;
+    }
+
+    window.turnstile?.reset(widgetIdRef.current);
+    onToken('');
+  }, [onToken, resetSignal]);
 
   if (!siteKey) {
     return null;

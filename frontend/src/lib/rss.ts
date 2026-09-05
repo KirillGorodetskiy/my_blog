@@ -1,4 +1,4 @@
-import type { Article } from '@/data/types';
+import type { ArticleList } from '@/data/types';
 import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
 
 function escapeXml(value: string): string {
@@ -15,7 +15,7 @@ function rssDate(isoDate: string): string {
 
 export function buildArticlesRss(
   siteUrl: string,
-  feedItems: Article[],
+  feedItems: ArticleList[],
 ): string {
   const origin = siteUrl.replace(/\/$/, '');
   const items = [...feedItems]

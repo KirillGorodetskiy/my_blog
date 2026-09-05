@@ -54,4 +54,40 @@ describe('Header', () => {
     expect(home.textContent).not.toMatch(/INSPIRED BY ME[.,]/);
     expect(home.textContent).not.toMatch(/BUILT WITH AI[.,]/);
   });
+
+  it('keeps full auth controls out of the mobile header', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          isAuthenticated: true,
+          username: 'reader905',
+          email: 'reader905@example.com',
+          isSuperuser: false,
+          isStaff: true,
+        }),
+      }),
+    );
+
+    render(
+      <AuthProvider>
+        <SearchProvider>
+          <Header />
+        </SearchProvider>
+      </AuthProvider>,
+    );
+
+    expect(
+      await screen.findByText('reader905'),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText('reader905')).toHaveLength(1);
+    expect(
+      screen.queryByRole('dialog', { name: 'Menu' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Open menu' }),
+    ).toBeInTheDocument();
+  });
 });

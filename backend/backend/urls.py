@@ -13,9 +13,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('blog.api.urls')),
     path('healthz/', healthz),
-    re_path(
-        r'^media/(?P<path>.*)$',
-        serve,
-        {'document_root': settings.MEDIA_ROOT},
-    ),
 ]
+
+if settings.SERVE_MEDIA:
+    urlpatterns.append(
+        re_path(
+            r'^media/(?P<path>.*)$',
+            serve,
+            {'document_root': settings.MEDIA_ROOT},
+        ),
+    )

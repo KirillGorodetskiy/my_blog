@@ -67,4 +67,34 @@ describe('ProjectDetail', () => {
         .tagName,
     ).toBe('P');
   });
+
+  it('shows the cover and screenshots without cropping', () => {
+    render(
+      <ProjectDetail
+        project={{
+          ...projects[0],
+          image: '/media/projects/cover.png',
+          screenshots: [
+            {
+              src: '/media/projects/shot.png',
+              alt: 'Settings screen',
+              caption: 'Bot settings',
+            },
+          ],
+        }}
+      />,
+    );
+
+    const cover = screen.getByRole('img', {
+      name: `Artwork for ${projects[0].title}`,
+    });
+    const shot = screen.getByRole('img', {
+      name: 'Settings screen',
+    });
+
+    expect(cover).toHaveClass('article-content-image');
+    expect(cover).not.toHaveClass('object-cover');
+    expect(shot).toHaveClass('article-screenshot');
+    expect(shot).not.toHaveClass('object-cover');
+  });
 });

@@ -15,18 +15,65 @@ describe('ProjectCard', () => {
     );
   });
 
-  it('renders inline markdown in the description', () => {
+  it('uses a contained project thumbnail', () => {
     const { container } = render(
+      <ProjectCard project={projects[0]} />,
+    );
+
+    expect(
+      container.querySelector('.project-thumbnail'),
+    ).not.toBeNull();
+    expect(
+      screen.getByRole('img', {
+        name: `Artwork for ${projects[0].title}`,
+      }),
+    ).toHaveClass('object-contain');
+  });
+
+  it('shows only the overview on the card', () => {
+    render(
       <ProjectCard
         project={{
           ...projects[0],
-          description: '**Django** + `PostgreSQL`',
+          description: [
+            '## Overview',
+            '',
+            'A Django blog built as a learning project.',
+            '',
+            '## Key Features',
+            '',
+            '- Post management',
+          ].join('\n'),
         }}
       />,
     );
 
-    expect(screen.getByText('Django').tagName).toBe('STRONG');
-    expect(screen.getByText('PostgreSQL').tagName).toBe('CODE');
+    expect(
+      screen.getByText(
+        'A Django blog built as a learning project.',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Post management'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Key Features'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the overview as plain readable text', () => {
+    const { container } = render(
+      <ProjectCard
+        project={{
+          ...projects[0],
+          description: '**Django** with `PostgreSQL`',
+        }}
+      />,
+    );
+
+    expect(container.textContent).toContain(
+      'Django with PostgreSQL',
+    );
     expect(container.textContent).not.toContain('**');
   });
 });

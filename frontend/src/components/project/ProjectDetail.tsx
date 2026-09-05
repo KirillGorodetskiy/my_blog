@@ -3,7 +3,12 @@ import { StaffEditLink } from '@/components/content/StaffEditLink';
 import { MarkdownContent } from '@/components/markdown/MarkdownContent';
 import { MarkdownInline } from '@/components/markdown/MarkdownInline';
 import { ContentMedia } from '@/components/ui/ContentMedia';
-import { UNWRITTEN, type Project } from '@/data/types';
+import {
+  UNWRITTEN,
+  type Project,
+  type ProjectList,
+} from '@/data/types';
+import { projectCardSummary } from '@/lib/markdown';
 
 function Section({
   title,
@@ -37,7 +42,7 @@ export function ProjectDetail({
   related = [],
 }: {
   project: Project;
-  related?: Project[];
+  related?: ProjectList[];
 }) {
 
   return (
@@ -61,6 +66,7 @@ export function ProjectDetail({
           />
         </div>
         <ContentMedia
+          role='article-content-image'
           src={project.image}
           label={`Artwork for ${project.title}`}
           className='project-cover'
@@ -102,9 +108,9 @@ export function ProjectDetail({
               {project.screenshots.map((shot) => (
                 <figure key={shot.src}>
                   <ContentMedia
+                    role='article-screenshot'
                     src={shot.src}
                     label={shot.alt}
-                    className='aspect-[16/10] w-full rounded-xl'
                   />
                   <figcaption className='article-caption'>
                     <MarkdownInline source={shot.caption} />
@@ -154,7 +160,7 @@ export function ProjectDetail({
           items={related.map((item) => ({
             slug: item.slug,
             title: item.title,
-            detail: item.description,
+            detail: projectCardSummary(item.description),
           }))}
         />
       </div>

@@ -1,12 +1,12 @@
 import { featuredItems } from '@/lib/filters';
 import { ArticleCard } from '@/components/articles/ArticleCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
-import type { Article } from '@/data/types';
+import type { ArticleList } from '@/data/types';
 
 export function FeaturedArticles({
   articles,
 }: {
-  articles: Article[];
+  articles: ArticleList[];
 }) {
   const featured = featuredItems(articles, 3);
 

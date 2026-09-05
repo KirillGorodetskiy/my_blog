@@ -3,7 +3,12 @@ import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import nextConfig from '../../../next.config';
 import type { AuthUser } from '@/lib/api/auth';
-import { ApiError, apiUrl, fetchJson } from '@/lib/api/client';
+import {
+  ApiError,
+  apiUrl,
+  ensureCsrfToken,
+  fetchJson,
+} from '@/lib/api/client';
 
 describe('nextConfig', () => {
   it('keeps API trailing slashes for Django', () => {
@@ -56,6 +61,45 @@ describe('apiUrl', () => {
   it('uses the internal origin on the server', () => {
     expect(apiUrl('/api/v1/articles/')).toContain(
       '/api/v1/articles/',
+    );
+  });
+});
+
+describe('ensureCsrfToken', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    document.cookie = 'csrftoken=; max-age=0; path=/';
+  });
+
+  it('returns the existing cookie without fetching', async () => {
+    document.cookie = 'csrftoken=already';
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(ensureCsrfToken()).resolves.toBe('already');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('bootstraps /auth/me/ when the cookie is missing', async () => {
+    const fetchMock = vi.fn().mockImplementation(async () => {
+      document.cookie = 'csrftoken=from-me';
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          isAuthenticated: false,
+          username: null,
+          email: null,
+          isStaff: false,
+          isSuperuser: false,
+        }),
+      };
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(ensureCsrfToken()).resolves.toBe('from-me');
+    expect(String(fetchMock.mock.calls[0][0])).toContain(
+      '/api/v1/auth/me/',
     );
   });
 });

@@ -29,7 +29,7 @@ services:
       DUMP_DIR: /dumps
     volumes:
       - ./db/dumps:/dumps:ro
-      - backend_media:/app/backend/media
+      - ${MEDIA_HOST_PATH:-./backend/media}:/app/backend/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -68,4 +68,3 @@ services:
 
 volumes:
   postgres_data:
-  backend_media:

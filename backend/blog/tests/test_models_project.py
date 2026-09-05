@@ -51,3 +51,10 @@ def test_str_representation():
     project = ProjectFactory.create()
 
     assert str(project) == f'Project #{project.pk}: {project.title}'
+
+
+def test_project_has_no_icon_field():
+    field_names = {
+        field.name for field in Project._meta.get_fields()
+    }
+    assert 'icon' not in field_names

@@ -250,6 +250,60 @@ def test_register_rejects_duplicate_and_weak_password(api):
     assert weak.status_code == HTTPStatus.BAD_REQUEST
 
 
+def test_register_validates_locally_before_turnstile(
+    api,
+    monkeypatch,
+):
+    calls = []
+
+    def fake_verify(token, post=None):
+        calls.append(token)
+
+    monkeypatch.setattr(
+        'blog.turnstile.verify_turnstile',
+        fake_verify,
+    )
+    mismatch = api.post(
+        '/api/v1/auth/register/',
+        register_payload(
+            username='fresh',
+            email='fresh@example.com',
+            password='SafePass123!',
+            passwordConfirm='Different123!',
+            turnstileToken='used-once',
+        ),
+        format='json',
+    )
+    assert mismatch.status_code == HTTPStatus.BAD_REQUEST
+    assert calls == []
+
+    weak = api.post(
+        '/api/v1/auth/register/',
+        register_payload(
+            username='fresh',
+            email='fresh@example.com',
+            password='123',
+            passwordConfirm='123',
+            turnstileToken='used-once',
+        ),
+        format='json',
+    )
+    assert weak.status_code == HTTPStatus.BAD_REQUEST
+    assert calls == []
+
+    created = api.post(
+        '/api/v1/auth/register/',
+        register_payload(
+            username='fresh',
+            email='fresh@example.com',
+            turnstileToken='used-once',
+        ),
+        format='json',
+    )
+    assert created.status_code == HTTPStatus.CREATED
+    assert calls == ['used-once']
+
+
 def test_register_rejects_missing_turnstile(api):
     response = api.post(
         '/api/v1/auth/register/',

@@ -1,4 +1,5 @@
-import type { Article, Project } from '@/data/types';
+import type { ArticleList, ProjectList } from '@/data/types';
+import { projectCardSummary } from '@/lib/markdown';
 
 export type SearchGroup =
   | 'Articles'
@@ -45,8 +46,8 @@ export const NAVIGATION: SearchItem[] = [
 ];
 
 export function buildSearchItems(
-  articleItems: Article[],
-  projectItems: Project[],
+  articleItems: ArticleList[],
+  projectItems: ProjectList[],
 ): SearchItem[] {
   const mappedArticles = articleItems.map((article) => ({
     group: 'Articles' as const,
@@ -65,7 +66,7 @@ export function buildSearchItems(
     group: 'Projects' as const,
     title: project.title,
     href: `/projects/${project.slug}`,
-    detail: project.description,
+    detail: projectCardSummary(project.description),
     haystack: [
       project.title,
       project.description,

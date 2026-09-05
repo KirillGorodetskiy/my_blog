@@ -1,29 +1,29 @@
-import type { Article, Project } from '@/data/types';
+import type { ArticleList, ProjectList } from '@/data/types';
 
-function byDateAsc(left: Article, right: Article): number {
+function byDateAsc(left: ArticleList, right: ArticleList): number {
   return left.date.localeCompare(right.date);
 }
 
 export function getArticle(
   slug: string,
-  collection: Article[],
-): Article | undefined {
+  collection: ArticleList[],
+): ArticleList | undefined {
   return collection.find((article) => article.slug === slug);
 }
 
 export function getProject(
   slug: string,
-  collection: Project[],
-): Project | undefined {
+  collection: ProjectList[],
+): ProjectList | undefined {
   return collection.find((project) => project.slug === slug);
 }
 
 export function getAdjacentArticles(
   slug: string,
-  collection: Article[],
+  collection: ArticleList[],
 ): {
-  previous?: Article;
-  next?: Article;
+  previous?: ArticleList;
+  next?: ArticleList;
 } {
   const ordered = [...collection].sort(byDateAsc);
   const index = ordered.findIndex((item) => item.slug === slug);
@@ -50,9 +50,9 @@ function overlap(left: string[], right: string[]): number {
 
 export function getRelatedArticles(
   slug: string,
-  collection: Article[],
+  collection: ArticleList[],
   limit = 3,
-): Article[] {
+): ArticleList[] {
   const current = getArticle(slug, collection);
 
   if (!current) {
@@ -86,9 +86,9 @@ export function getRelatedArticles(
 
 export function getRelatedProjects(
   slug: string,
-  collection: Project[],
+  collection: ProjectList[],
   limit = 3,
-): Project[] {
+): ProjectList[] {
   const current = getProject(slug, collection);
 
   if (!current) {

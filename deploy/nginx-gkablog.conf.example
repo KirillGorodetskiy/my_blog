@@ -52,15 +52,17 @@ server {
     location /static/ {
         proxy_pass http://django_backend;
         proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
+    # Serve uploaded files from the host bind mount.
+    # Do not proxy /media/ through Django in production.
     location /media/ {
-        proxy_pass http://django_backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $remote_addr;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        alias /opt/stacks/my_blog/media/;
+        add_header X-Content-Type-Options nosniff always;
+        autoindex off;
     }
 
     location / {

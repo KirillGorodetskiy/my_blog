@@ -9,7 +9,7 @@ export const ARTICLE_CATEGORIES = [
 
 export type ArticleCategory = string;
 
-export interface Article {
+export interface ArticleList {
   slug: string;
   title: string;
   category: ArticleCategory;
@@ -19,8 +19,11 @@ export interface Article {
   image: string;
   featured: boolean;
   tags: string[];
-  body: string;
   adminUrl?: string | null;
+}
+
+export interface Article extends ArticleList {
+  body: string;
 }
 
 export const PROJECT_CATEGORIES = [
@@ -46,7 +49,7 @@ export interface ProjectScreenshot {
   caption: string;
 }
 
-export interface Project {
+export interface ProjectList {
   slug: string;
   title: string;
   category: ProjectCategory;
@@ -55,6 +58,10 @@ export interface Project {
   featured: boolean;
   status: ProjectStatus;
   technologies: string[];
+  adminUrl?: string | null;
+}
+
+export interface Project extends ProjectList {
   problem: string;
   solution: string;
   architecture: string;
@@ -65,7 +72,6 @@ export interface Project {
   lessons: string[];
   githubUrl: string | null;
   demoUrl: string | null;
-  adminUrl?: string | null;
 }
 
 export const UNWRITTEN =

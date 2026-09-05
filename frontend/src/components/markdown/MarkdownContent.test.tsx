@@ -144,6 +144,60 @@ describe('MarkdownContent', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('renders markdown images without a crop box', () => {
+    const { container } = render(
+      <MarkdownContent
+        source='![Architecture diagram](/media/posts/diagram.png)'
+      />,
+    );
+
+    const image = screen.getByRole('img', {
+      name: 'Architecture diagram',
+    });
+
+    expect(container.querySelector('.article-figure')).not.toBeNull();
+    expect(image).toHaveClass('article-content-image');
+    expect(image).not.toHaveClass('object-cover');
+    expect(container.querySelector('.aspect-\\[16\\/9\\]')).toBeNull();
+  });
+
+  it('renders a configured https image as a plain img', () => {
+    render(
+      <MarkdownContent
+        source='![Site shot](https://gkablog.com/media/a.png)'
+      />,
+    );
+
+    expect(
+      screen.getByRole('img', { name: 'Site shot' }),
+    ).toHaveAttribute('src', 'https://gkablog.com/media/a.png');
+  });
+
+  it('renders an unsupported https host without crashing', () => {
+    render(
+      <MarkdownContent
+        source='![Remote](https://images.example/shot.png)'
+      />,
+    );
+
+    expect(
+      screen.getByRole('img', { name: 'Remote' }),
+    ).toHaveAttribute('src', 'https://images.example/shot.png');
+    expect(screen.getByRole('img', { name: 'Remote' }).tagName).toBe(
+      'IMG',
+    );
+  });
+
+  it('rejects unsafe image schemes', () => {
+    render(
+      <MarkdownContent
+        source='![bad](javascript:alert(1))'
+      />,
+    );
+
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  });
+
   it('rejects javascript links', () => {
     render(
       <MarkdownContent source='[bad](javascript:alert(1))' />,

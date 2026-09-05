@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { Article } from '@/data/types';
+import type { ArticleList } from '@/data/types';
 import {
   categoryToParam,
   filterByCategory,
@@ -18,7 +18,7 @@ import {
 export function ArticlesBrowser({
   articles,
 }: {
-  articles: Article[];
+  articles: ArticleList[];
 }) {
   const params = useSearchParams();
   const router = useRouter();

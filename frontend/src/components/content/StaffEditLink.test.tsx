@@ -84,4 +84,26 @@ describe('StaffEditLink', () => {
       );
     });
   });
+
+  it('hides the edit action when the API omits adminUrl', async () => {
+    authState.user = {
+      ...authState.user,
+      username: 'moderator',
+      isStaff: true,
+    };
+    fetchJson.mockResolvedValue({ adminUrl: null });
+    render(
+      <StaffEditLink
+        kind='article'
+        slug='welcome'
+        label='Edit article'
+      />,
+    );
+    await waitFor(() => {
+      expect(fetchJson).toHaveBeenCalled();
+    });
+    expect(
+      screen.queryByRole('link', { name: 'Edit article' }),
+    ).not.toBeInTheDocument();
+  });
 });

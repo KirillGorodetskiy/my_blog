@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { PROJECT_CATEGORIES } from '@/data/types';
-import type { Project } from '@/data/types';
+import type { ProjectList } from '@/data/types';
 import {
   categoryToParam,
   filterByCategory,
@@ -19,7 +19,7 @@ import {
 export function ProjectsBrowser({
   projects,
 }: {
-  projects: Project[];
+  projects: ProjectList[];
 }) {
   const params = useSearchParams();
   const router = useRouter();

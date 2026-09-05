@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { formatDate } from '@/lib/dates';
-import type { Article } from '@/data/types';
+import type { ArticleList } from '@/data/types';
 import { ContentMedia } from '@/components/ui/ContentMedia';
 
 interface ArticleCardProps {
-  article: Article;
+  article: ArticleList;
 }
 
 export function ArticleCard({ article }: ArticleCardProps) {
@@ -24,9 +24,9 @@ export function ArticleCard({ article }: ArticleCardProps) {
         className='block'
       >
         <ContentMedia
+          role='article-hero'
           src={article.image}
           label={`Artwork for ${article.title}`}
-          className='aspect-[16/10] w-full'
         />
         <div className='space-y-3 px-5 py-5'>
           <p className='text-sm text-[#91a09a]'>

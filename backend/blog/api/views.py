@@ -29,12 +29,14 @@ from blog.models import (
     Project,
 )
 from blog.api.serializers import (
-    ArticleSerializer,
+    ArticleDetailSerializer,
+    ArticleListSerializer,
     CommentCreateSerializer,
     CommentSerializer,
     LoginSerializer,
     MeSerializer,
-    ProjectSerializer,
+    ProjectDetailSerializer,
+    ProjectListSerializer,
     RegisterSerializer,
     SearchArticleSerializer,
     SearchProjectSerializer,
@@ -50,9 +52,12 @@ def published_posts() -> QuerySet[Post]:
 
 
 def published_projects() -> QuerySet[Project]:
-    return (
-        Project.objects.filter(is_published=True)
-        .prefetch_related('screenshots')
+    return Project.objects.filter(is_published=True)
+
+
+def published_project_detail() -> QuerySet[Project]:
+    return published_projects().prefetch_related(
+        'screenshots',
     )
 
 
@@ -64,7 +69,7 @@ class ArticleListView(APIView):
         featured = request.query_params.get('featured')
         if featured in {'1', 'true', 'True'}:
             queryset = queryset.filter(featured=True)
-        serializer = ArticleSerializer(
+        serializer = ArticleListSerializer(
             queryset,
             many=True,
             context={'request': request},
@@ -78,7 +83,7 @@ class ArticleDetailView(APIView):
     def get(self, request, slug: str):
         article = get_object_or_404(published_posts(), slug=slug)
         return Response(
-            ArticleSerializer(
+            ArticleDetailSerializer(
                 article,
                 context={'request': request},
             ).data,
@@ -93,7 +98,7 @@ class ProjectListView(APIView):
         featured = request.query_params.get('featured')
         if featured in {'1', 'true', 'True'}:
             queryset = queryset.filter(featured=True)
-        serializer = ProjectSerializer(
+        serializer = ProjectListSerializer(
             queryset,
             many=True,
             context={'request': request},
@@ -106,11 +111,11 @@ class ProjectDetailView(APIView):
 
     def get(self, request, slug: str):
         project = get_object_or_404(
-            published_projects(),
+            published_project_detail(),
             slug=slug,
         )
         return Response(
-            ProjectSerializer(
+            ProjectDetailSerializer(
                 project,
                 context={'request': request},
             ).data,

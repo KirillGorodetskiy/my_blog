@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileReset, setTurnstileReset] = useState(0);
   const [error, setError] = useState('');
 
   async function onSubmit(event: FormEvent) {
@@ -31,6 +32,8 @@ export default function RegisterPage() {
       });
       router.push('/');
     } catch (caught) {
+      setTurnstileToken('');
+      setTurnstileReset((value) => value + 1);
       setError(
         caught instanceof ApiError
           ? caught.message
@@ -91,7 +94,10 @@ export default function RegisterPage() {
             required
           />
         </label>
-        <TurnstileWidget onToken={setTurnstileToken} />
+        <TurnstileWidget
+          onToken={setTurnstileToken}
+          resetSignal={turnstileReset}
+        />
         {error ? <p className='auth-error'>{error}</p> : null}
         <button type='submit' className='auth-submit'>
           Create account
