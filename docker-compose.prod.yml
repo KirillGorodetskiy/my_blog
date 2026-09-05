@@ -1,0 +1,16 @@
+# Production override. Used only as:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml
+# IMAGE_TAG must be the full Git commit SHA. This file
+# removes local `build:` so the VPS never compiles.
+# Do not commit secrets. Doppler injects runtime env.
+
+services:
+  backend:
+    image: ghcr.io/kirillgorodetskiy/my-blog-backend:${IMAGE_TAG:?IMAGE_TAG is required}
+    build: !reset
+    pull_policy: always
+
+  frontend:
+    image: ghcr.io/kirillgorodetskiy/my-blog-frontend:${IMAGE_TAG:?IMAGE_TAG is required}
+    build: !reset
+    pull_policy: always

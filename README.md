@@ -227,27 +227,37 @@ proxy_set_header X-Forwarded-Proto $scheme;
 
 ## Production deployment
 
-GitHub Actions runs CI on `master`, then SSHes to the VPS
-and runs `/opt/stacks/my_blog/deploy.sh`. Doppler on the
-VPS injects `my-blog` / `prd` into Docker Compose.
-Host Nginx is not reloaded by application deploys.
+GitHub Actions tests `master`, builds Docker images,
+pushes them to GHCR, then SSHes to the VPS. The VPS
+pulls SHA-tagged images. It does not run `docker build`,
+`npm ci`, or `next build`. Doppler injects `my-blog` /
+`prd` into Compose. Host Nginx is not reloaded.
 
 ```text
-push/merge to master
-  → backend + frontend CI
+Push to master
+  → backend tests
+  → frontend tests + lint
+  → GitHub builds Docker images
+  → GHCR (tag = full commit SHA)
   → SSH
-  → deploy.sh
-  → git reset --hard origin/master
-  → doppler run -- docker compose up -d --build
+  → VPS pulls SHA-tagged images
   → health checks
 ```
 
+Production Compose files:
+
+```text
+docker-compose.yml
+docker-compose.prod.yml
+```
+
+`IMAGE_TAG` is the full Git SHA. Postgres keeps using
+`postgres:17-alpine` and the `postgres_data` volume.
+
 Migrations run **once** in
 `backend/docker/entrypoint.sh` when the backend
-container starts. The deploy script does not run
-`migrate` again. A failed migrate exits the container
-and fails health verification. Take a PostgreSQL backup
-before the first production deploy of new migrations.
+container starts. Take a PostgreSQL backup before the
+first production deploy of new migrations.
 
 Do not run `docker compose down` or `docker compose down
 -v` during ordinary deploys.
@@ -268,7 +278,7 @@ git checkout master
 # key, add it as a GitHub Deploy Key (read-only), and
 # clone with git@github.com:KirillGorodetskiy/my_blog.git
 
-# 2. Install Docker Engine and Compose.
+# 2. Install Docker Engine and Compose v2.24+.
 # 3. Allow the deploy user to run docker (no 777).
 sudo usermod -aG docker "$USER"
 
@@ -324,6 +334,18 @@ VPS_SSH_PORT
 `VPS_SSH_PORT` may be `22`. Application secrets do not
 belong here.
 
+Optional repository variable (public site key only):
+
+```text
+NEXT_PUBLIC_TURNSTILE_SITE_KEY
+```
+
+After the first image push, open the GHCR packages
+`my-blog-backend` and `my-blog-frontend` and link them
+to this repository. They can stay private (deploy logs
+in with the job `GITHUB_TOKEN`) or be made public so
+the VPS can pull without a token.
+
 Recreate the Actions → VPS key locally (do not commit):
 
 ```bash
@@ -359,8 +381,42 @@ VPS → GitHub repository credentials separate.
 ### Normal deployment
 
 Merge or push to `master`, or run the **Deploy**
-workflow manually on `master`. CI must pass before SSH
-deploy.
+workflow manually on `master`. Images must build and
+push before SSH deploy.
+
+### Running images and rollback
+
+On the VPS:
+
+```bash
+cd /opt/stacks/my_blog
+docker compose -f docker-compose.yml \
+  -f docker-compose.prod.yml ps
+docker inspect --format '{{.Config.Image}}' \
+  my_blog-backend-1 my_blog-frontend-1
+cat .last-good-image-tag
+```
+
+Manual redeploy of a known SHA (Doppler + GHCR token
+if packages are private):
+
+```bash
+IMAGE_TAG=<full-sha> \
+  GHCR_USER=kirillgorodetskiy \
+  GHCR_TOKEN='<read-packages-token>' \
+  /opt/stacks/my_blog/deploy.sh
+```
+
+Manual rollback:
+
+```bash
+/opt/stacks/my_blog/deploy/deploy.sh --rollback
+# or
+/opt/stacks/my_blog/deploy/deploy.sh --rollback <full-sha>
+```
+
+The VPS needs Docker Compose v2.24 or newer (`!reset`
+in `docker-compose.prod.yml`).
 
 ### Deploy script path
 
@@ -371,6 +427,7 @@ VPS:    /opt/stacks/my_blog/deploy.sh
 
 The VPS script updates git, then execs
 `deploy/deploy.sh --apply` from the checked-out commit.
+`IMAGE_TAG` must already be in the environment.
 
 ## Markdown images
 

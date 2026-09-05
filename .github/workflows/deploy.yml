@@ -15,6 +15,8 @@ permissions:
 
 env:
   FORCE_COLOR: '1'
+  BACKEND_IMAGE: ghcr.io/kirillgorodetskiy/my-blog-backend
+  FRONTEND_IMAGE: ghcr.io/kirillgorodetskiy/my-blog-frontend
 
 jobs:
   backend:
@@ -104,23 +106,116 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Build
-        run: npm run build
-
-  deploy:
-    name: Deploy production
+  image-backend:
+    name: Build backend image
     needs:
       - backend
       - frontend
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+            ${{ env.BACKEND_IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.created=${{ github.run_started_at }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=my-blog-backend
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+  image-frontend:
+    name: Build frontend image
+    needs:
+      - backend
+      - frontend
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          provenance: false
+          sbom: false
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=https://gkablog.com
+            INTERNAL_API_URL=http://backend:8000
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+            ${{ env.FRONTEND_IMAGE }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.created=${{ github.run_started_at }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=my-blog-frontend
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  deploy:
+    name: Deploy production
+    needs:
+      - image-backend
+      - image-frontend
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: production
+    permissions:
+      contents: read
+      packages: read
     steps:
       - name: Show commit being deployed
         run: |
           echo "Deploying commit ${GITHUB_SHA}"
-          echo "deployment start"
+          echo "backend ${BACKEND_IMAGE}:${GITHUB_SHA}"
+          echo "frontend ${FRONTEND_IMAGE}:${GITHUB_SHA}"
 
       - name: Deploy over SSH
         env:
@@ -128,11 +223,15 @@ jobs:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           VPS_SSH_PORT: ${{ secrets.VPS_SSH_PORT }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           set -Eeuo pipefail
           : "${VPS_HOST:?VPS_HOST secret is required}"
           : "${VPS_USER:?VPS_USER secret is required}"
           : "${VPS_SSH_PRIVATE_KEY:?VPS_SSH_PRIVATE_KEY secret is required}"
+          : "${IMAGE_TAG:?IMAGE_TAG is required}"
           SSH_PORT="${VPS_SSH_PORT:-22}"
           if [ -z "${SSH_PORT}" ]; then
             SSH_PORT=22
@@ -145,11 +244,14 @@ jobs:
           ssh-keyscan -p "${SSH_PORT}" -H "${VPS_HOST}" \
             >> "${HOME}/.ssh/known_hosts"
 
-          echo "SSHing to ${VPS_USER}@${VPS_HOST} to run deploy.sh"
+          echo "SSHing to ${VPS_USER}@${VPS_HOST} to pull ${IMAGE_TAG}"
           ssh \
             -i "${HOME}/.ssh/deploy_key" \
             -p "${SSH_PORT}" \
             -o IdentitiesOnly=yes \
             -o BatchMode=yes \
             "${VPS_USER}@${VPS_HOST}" \
-            '/opt/stacks/my_blog/deploy.sh'
+            "IMAGE_TAG=$(printf '%q' "${IMAGE_TAG}") \
+             GHCR_USER=$(printf '%q' "${GHCR_USER}") \
+             GHCR_TOKEN=$(printf '%q' "${GHCR_TOKEN}") \
+             /opt/stacks/my_blog/deploy.sh"

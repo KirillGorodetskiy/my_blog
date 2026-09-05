@@ -3,6 +3,10 @@
 # `doppler run` injects my-blog/prd. Do not commit secrets.
 # There is no `env_file: .env`, so production does not need
 # a plaintext dotenv file.
+#
+# Local: docker compose up --build
+# Production: docker compose -f docker-compose.yml
+#   -f docker-compose.prod.yml (GHCR images, no build)
 
 services:
   postgres:

@@ -12,6 +12,7 @@ wheels/
 *.log
 
 .env
+.last-good-image-tag
 
 node_modules/
 .next/
