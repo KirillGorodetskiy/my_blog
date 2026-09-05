@@ -70,12 +70,18 @@ def project_delete_url(project_obj):
 
 @pytest.fixture
 def post_list():
-    return PostFactory.create_batch(size=settings.POST_COUNT_ON_PAGE + 5)
+    return PostFactory.create_batch(
+        size=settings.POST_COUNT_ON_PAGE + 5,
+        is_published=True,
+    )
 
 
 @pytest.fixture
 def project_list():
-    return ProjectFactory.create_batch(size=settings.POST_COUNT_ON_PAGE + 5)
+    return ProjectFactory.create_batch(
+        size=settings.POST_COUNT_ON_PAGE + 5,
+        is_published=True,
+    )
 
 
 @pytest.fixture
@@ -113,8 +119,16 @@ def superuser_client(superuser):
 @pytest.fixture
 def objs():
     return {
-        'post': Post.objects.create(title='T', body='C'),
-        'project': Project.objects.create(title='P', description='D')
+        'post': Post.objects.create(
+            title='T',
+            body='C',
+            is_published=True,
+        ),
+        'project': Project.objects.create(
+            title='P',
+            description='D',
+            is_published=True,
+        ),
     }
 
 
@@ -130,7 +144,8 @@ def post():
 def post_obj():
     return Post.objects.create(
         title='My title',
-        body='My long beatiful message...'
+        body='My long beatiful message...',
+        is_published=True,
     )
 
 
@@ -146,5 +161,6 @@ def project():
 def project_obj():
     return Project.objects.create(
         title='My project',
-        description='Super description'
+        description='Super description',
+        is_published=True,
     )

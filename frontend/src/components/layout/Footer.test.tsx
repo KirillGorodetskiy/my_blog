@@ -1,9 +1,27 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Footer } from '@/components/layout/Footer';
 import { CONTACT_EMAIL, SITE_NAME } from '@/lib/site';
 
 describe('Footer', () => {
+  it('keeps rooms and elsewhere in one compact bar', () => {
+    render(<Footer />);
+
+    const footer = screen.getByRole('contentinfo');
+    const rooms = within(footer).getByRole('navigation', {
+      name: 'Rooms',
+    });
+    const elsewhere = within(footer).getByRole(
+      'navigation',
+      { name: 'Elsewhere' },
+    );
+
+    expect(rooms.compareDocumentPosition(elsewhere)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(footer.querySelectorAll('nav')).toHaveLength(2);
+  });
+
   it('shows copyright, rooms, rss, and contact', () => {
     render(<Footer />);
 

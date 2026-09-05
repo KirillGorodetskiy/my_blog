@@ -55,4 +55,19 @@ describe('HomeHero', () => {
       screen.queryByTestId('hero-effects'),
     ).not.toBeInTheDocument();
   });
+
+  it('keeps the full headline readable on compact screens', () => {
+    const { container } = render(<HomeHero />);
+    const section = container.querySelector('.home-hero');
+    const title = screen.getByRole('heading', { level: 1 });
+
+    expect(section).not.toBeNull();
+    expect(title).toHaveClass('home-hero-title');
+    expect(title).toHaveTextContent('A calmer way');
+    expect(title).toHaveTextContent('to explore technology');
+    expect(title.closest('.home-hero-copy')).not.toBeNull();
+    expect(
+      container.querySelector('.scene-hero-art-wrap'),
+    ).not.toBeNull();
+  });
 });

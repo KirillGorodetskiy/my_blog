@@ -9,14 +9,15 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { useSearchOverlay } from '@/components/search/SearchContext';
+import { searchContent } from '@/lib/api/search';
+import { searchHitsToItems } from '@/lib/api/searchMap';
 import {
-  buildSearchItems,
   groupSearchItems,
   moveSearchIndex,
+  NAVIGATION,
   searchItems,
+  type SearchItem,
 } from '@/lib/search';
-
-const CATALOG = buildSearchItems();
 
 function emptySubscribe() {
   return () => undefined;
@@ -35,17 +36,44 @@ export function SearchDialog() {
   const router = useRouter();
   const { open, setOpen } = useSearchOverlay();
   const [query, setQuery] = useState('');
+  const [remote, setRemote] = useState<SearchItem[]>([]);
   const [active, setActive] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const catalog = query.trim() ? remote : NAVIGATION;
   const results = useMemo(
-    () => searchItems(CATALOG, query),
-    [query],
+    () => searchItems(catalog, query),
+    [catalog, query],
   );
   const groups = useMemo(
     () => groupSearchItems(results),
     [results],
   );
+
+  useEffect(() => {
+    const needle = query.trim();
+
+    if (!needle) {
+      return;
+    }
+
+    let cancelled = false;
+    searchContent(needle)
+      .then((hits) => {
+        if (!cancelled) {
+          setRemote(searchHitsToItems(hits));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRemote(NAVIGATION);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query]);
 
   useEffect(() => {
     const dialog = dialogRef.current;

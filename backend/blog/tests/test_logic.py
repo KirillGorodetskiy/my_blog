@@ -45,7 +45,7 @@ NON_SAFE_METHODS_CASES_FOR_NON_SUPER_USER = (
 
 def get_unsafe_methods_names(model_names: tuple) -> tuple:
     '''returns names create_model update_model delete_model'''
-    suffixes = ('add', 'delete', 'edit')
+    suffixes = ('add', 'edit', 'delete')
     result = [
         f'{model_name}_{suffix}'
         for model_name in model_names

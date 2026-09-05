@@ -5,28 +5,25 @@ import { ReadingProgress } from '@/components/article/ReadingProgress';
 import { RelatedList } from '@/components/article/RelatedList';
 import { ShareActions } from '@/components/article/ShareActions';
 import { TableOfContents } from '@/components/article/TableOfContents';
-import { MediaPlaceholder } from '@/components/ui/MediaPlaceholder';
-import { articles } from '@/data/articles';
+import { CommentSection } from '@/components/comments/CommentSection';
+import { ContentMedia } from '@/components/ui/ContentMedia';
+import { listArticles } from '@/lib/api/articles';
+import { loadArticle } from '@/lib/api/load';
 import {
   getAdjacentArticles,
-  getArticle,
   getRelatedArticles,
 } from '@/lib/content';
 import { formatDate } from '@/lib/dates';
 import { extractHeadings, parseMarkdown } from '@/lib/markdown';
 import { articleMetadata } from '@/lib/metadata';
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return articles.map((article) => ({ slug: article.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
 }: PageProps<'/articles/[slug]'>) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await loadArticle(slug);
 
   if (!article) {
     return { title: 'Article' };
@@ -39,15 +36,19 @@ export default async function ArticleDetailPage({
   params,
 }: PageProps<'/articles/[slug]'>) {
   const { slug } = await params;
-  const article = getArticle(slug);
+  const article = await loadArticle(slug);
 
   if (!article) {
     notFound();
   }
 
+  const articles = await listArticles();
   const headings = extractHeadings(parseMarkdown(article.body));
-  const { previous, next } = getAdjacentArticles(article.slug);
-  const related = getRelatedArticles(article.slug);
+  const { previous, next } = getAdjacentArticles(
+    article.slug,
+    articles,
+  );
+  const related = getRelatedArticles(article.slug, 3, articles);
 
   return (
     <article>
@@ -65,9 +66,9 @@ export default async function ArticleDetailPage({
             <li key={tag}>{tag}</li>
           ))}
         </ul>
-        <MediaPlaceholder
+        <ContentMedia
           src={article.image}
-          label={`Pending artwork for ${article.title}`}
+          label={`Artwork for ${article.title}`}
           className='article-cover'
         />
       </header>
@@ -89,6 +90,10 @@ export default async function ArticleDetailPage({
                 title: item.title,
                 detail: item.excerpt,
               }))}
+            />
+            <CommentSection
+              kind='article'
+              slug={article.slug}
             />
           </div>
         </div>

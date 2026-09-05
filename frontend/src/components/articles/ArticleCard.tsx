@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { formatDate } from '@/lib/dates';
 import type { Article } from '@/data/articles';
-import { MediaPlaceholder } from '@/components/ui/MediaPlaceholder';
+import { ContentMedia } from '@/components/ui/ContentMedia';
 
 interface ArticleCardProps {
   article: Article;
@@ -23,9 +23,9 @@ export function ArticleCard({ article }: ArticleCardProps) {
         href={`/articles/${article.slug}`}
         className='block'
       >
-        <MediaPlaceholder
+        <ContentMedia
           src={article.image}
-          label={`Pending artwork for ${article.title}`}
+          label={`Artwork for ${article.title}`}
           className='aspect-[16/10] w-full'
         />
         <div className='space-y-3 px-5 py-5'>

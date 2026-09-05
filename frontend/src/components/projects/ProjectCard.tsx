@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Project } from '@/data/projects';
-import { MediaPlaceholder } from '@/components/ui/MediaPlaceholder';
+import { ContentMedia } from '@/components/ui/ContentMedia';
 
 interface ProjectCardProps {
   project: Project;
@@ -22,9 +22,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
         href={`/projects/${project.slug}`}
         className='block'
       >
-        <MediaPlaceholder
+        <ContentMedia
           src={project.image}
-          label={`Pending artwork for ${project.title}`}
+          label={`Artwork for ${project.title}`}
           className='aspect-[16/10] w-full'
         />
         <div className='space-y-3 px-5 py-5'>

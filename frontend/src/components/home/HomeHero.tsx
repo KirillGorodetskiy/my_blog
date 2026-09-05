@@ -9,22 +9,30 @@ import {
 
 export function HomeHero() {
   return (
-    <section className='relative overflow-hidden bg-[#05090a]'>
-      <HeroArtwork>
-        <Image
-          src='/images/home-panorama.jpg'
-          alt={
-            'A mountain shelter at night: library on the left, ' +
-            'a man at a desk in the center, and a workshop on ' +
-            'the right, with a lake, moon, and Milky Way outside.'
-          }
-          width={1024}
-          height={438}
-          unoptimized
-          priority
-          className='h-auto w-full'
-        />
-      </HeroArtwork>
+    <section
+      className={
+        'home-hero scene-hero relative overflow-hidden ' +
+        'bg-[#05090a]'
+      }
+    >
+      <div className='scene-hero-art-wrap'>
+        <HeroArtwork>
+          <Image
+            src='/images/home-panorama.jpg'
+            alt={
+              'A mountain shelter at night: library on the ' +
+              'left, a man at a desk in the center, and a ' +
+              'workshop on the right, with a lake, moon, ' +
+              'and Milky Way outside.'
+            }
+            width={1024}
+            height={438}
+            unoptimized
+            priority
+            className='scene-hero-art h-auto w-full'
+          />
+        </HeroArtwork>
+      </div>
       <div
         className={
           'absolute inset-0 bg-gradient-to-r from-[#05090a]/78 ' +
@@ -39,21 +47,24 @@ export function HomeHero() {
       />
       <HeroCopy
         className={
-          'absolute inset-0 z-10 mx-auto flex max-w-6xl ' +
-          'flex-col justify-center px-5 pb-12 pt-20 md:px-8'
+          'home-hero-copy scene-hero-copy absolute inset-0 ' +
+          'z-10 mx-auto ' +
+          'flex max-w-6xl flex-col justify-center px-5 ' +
+          'pb-12 pt-20 md:px-8'
         }
       >
         <div className='max-w-xl'>
           <h1
             className={
-              'text-4xl font-medium leading-[1.08] ' +
-              'tracking-tight text-[#edf3ef] sm:text-5xl ' +
-              'lg:text-6xl'
+              'home-hero-title font-medium leading-[1.08] ' +
+              'tracking-tight text-[#edf3ef]'
             }
           >
-            A calmer way
-            <br />
-            to explore technology
+            <span className='home-hero-lead'>A calmer way</span>
+            {' '}
+            <span className='home-hero-rest'>
+              to explore technology
+            </span>
           </h1>
           <p
             className={

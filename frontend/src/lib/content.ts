@@ -6,19 +6,28 @@ function byDateAsc(left: Article, right: Article): number {
   return left.date.localeCompare(right.date);
 }
 
-export function getArticle(slug: string): Article | undefined {
-  return articles.find((article) => article.slug === slug);
+export function getArticle(
+  slug: string,
+  collection: Article[] = articles,
+): Article | undefined {
+  return collection.find((article) => article.slug === slug);
 }
 
-export function getProject(slug: string): Project | undefined {
-  return projects.find((project) => project.slug === slug);
+export function getProject(
+  slug: string,
+  collection: Project[] = projects,
+): Project | undefined {
+  return collection.find((project) => project.slug === slug);
 }
 
-export function getAdjacentArticles(slug: string): {
+export function getAdjacentArticles(
+  slug: string,
+  collection: Article[] = articles,
+): {
   previous?: Article;
   next?: Article;
 } {
-  const ordered = [...articles].sort(byDateAsc);
+  const ordered = [...collection].sort(byDateAsc);
   const index = ordered.findIndex((item) => item.slug === slug);
 
   if (index === -1) {
@@ -44,14 +53,15 @@ function overlap(left: string[], right: string[]): number {
 export function getRelatedArticles(
   slug: string,
   limit = 3,
+  collection: Article[] = articles,
 ): Article[] {
-  const current = getArticle(slug);
+  const current = getArticle(slug, collection);
 
   if (!current) {
     return [];
   }
 
-  const others = articles.filter((item) => item.slug !== slug);
+  const others = collection.filter((item) => item.slug !== slug);
   const tagged = others
     .map((item) => ({
       item,
@@ -79,14 +89,15 @@ export function getRelatedArticles(
 export function getRelatedProjects(
   slug: string,
   limit = 3,
+  collection: Project[] = projects,
 ): Project[] {
-  const current = getProject(slug);
+  const current = getProject(slug, collection);
 
   if (!current) {
     return [];
   }
 
-  const others = projects.filter((item) => item.slug !== slug);
+  const others = collection.filter((item) => item.slug !== slug);
   const tagged = others
     .map((item) => ({
       item,

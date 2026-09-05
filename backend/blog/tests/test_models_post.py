@@ -46,10 +46,10 @@ def test_post_related_to_project_and_tags() -> None:
     )
 
 
-def test_can_be_published_without_published_at_current_behavior():
+def test_publish_sets_published_at_when_missing():
     p = PostFactory.create(is_published=True, published_at=None)
     assert p.is_published is True
-    assert p.published_at is None
+    assert p.published_at is not None
 
 
 def test_can_set_published_at_when_published():

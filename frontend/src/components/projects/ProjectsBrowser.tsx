@@ -2,10 +2,8 @@
 
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  PROJECT_CATEGORIES,
-  projects,
-} from '@/data/projects';
+import { PROJECT_CATEGORIES } from '@/data/projects';
+import type { Project } from '@/data/types';
 import {
   categoryToParam,
   filterByCategory,
@@ -18,7 +16,11 @@ import {
   type ProjectFilterValue,
 } from '@/components/projects/ProjectFilters';
 
-export function ProjectsBrowser() {
+export function ProjectsBrowser({
+  projects,
+}: {
+  projects: Project[];
+}) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -27,7 +29,7 @@ export function ProjectsBrowser() {
       'All',
       ...usedCategories(projects, PROJECT_CATEGORIES),
     ],
-    [],
+    [projects],
   );
   const active = paramToCategory(
     params.get('tag'),
@@ -35,7 +37,7 @@ export function ProjectsBrowser() {
   );
   const visible = useMemo(
     () => filterByCategory(projects, active),
-    [active],
+    [active, projects],
   );
 
   function onChange(value: ProjectFilterValue) {

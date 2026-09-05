@@ -1,4 +1,5 @@
-import { articles } from '@/data/articles';
+import { articles as demoArticles } from '@/data/articles';
+import type { Article } from '@/data/types';
 import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/site';
 
 function escapeXml(value: string): string {
@@ -13,9 +14,12 @@ function rssDate(isoDate: string): string {
   return new Date(`${isoDate}T00:00:00.000Z`).toUTCString();
 }
 
-export function buildArticlesRss(siteUrl: string): string {
+export function buildArticlesRss(
+  siteUrl: string,
+  feedItems: Article[] = demoArticles,
+): string {
   const origin = siteUrl.replace(/\/$/, '');
-  const items = [...articles]
+  const items = [...feedItems]
     .sort((left, right) =>
       right.date.localeCompare(left.date),
     )

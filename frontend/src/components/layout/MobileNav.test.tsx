@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { AuthProvider } from '@/components/auth/AuthContext';
 import { MobileNav } from '@/components/layout/MobileNav';
 
 const LINKS = [
@@ -9,14 +10,35 @@ const LINKS = [
 ];
 
 describe('MobileNav', () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          isAuthenticated: false,
+          username: null,
+          email: null,
+          isSuperuser: false,
+        }),
+      }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
   it('does not render when closed', () => {
     render(
-      <MobileNav
-        open={false}
-        links={LINKS}
-        pathname='/'
-        onClose={() => undefined}
-      />,
+      <AuthProvider>
+        <MobileNav
+          open={false}
+          links={LINKS}
+          pathname='/'
+          onClose={() => undefined}
+        />
+      </AuthProvider>,
     );
 
     expect(
@@ -26,14 +48,16 @@ describe('MobileNav', () => {
 
   it('opens as a left panel on the document body', () => {
     const { container } = render(
-      <header>
-        <MobileNav
-          open
-          links={LINKS}
-          pathname='/'
-          onClose={() => undefined}
-        />
-      </header>,
+      <AuthProvider>
+        <header>
+          <MobileNav
+            open
+            links={LINKS}
+            pathname='/'
+            onClose={() => undefined}
+          />
+        </header>
+      </AuthProvider>,
     );
 
     const dialog = screen.getByRole('dialog', { name: 'Menu' });
@@ -51,12 +75,14 @@ describe('MobileNav', () => {
     const onClose = vi.fn();
 
     render(
-      <MobileNav
-        open
-        links={LINKS}
-        pathname='/'
-        onClose={onClose}
-      />,
+      <AuthProvider>
+        <MobileNav
+          open
+          links={LINKS}
+          pathname='/'
+          onClose={onClose}
+        />
+      </AuthProvider>,
     );
 
     await user.click(

@@ -5,7 +5,12 @@ import logging
 from dotenv import load_dotenv
 
 from backend.utils.config_check import check_required_env_vars
-from backend.utils.env_lists import hosts_from_env, origins_from_env
+from backend.utils.env_lists import (
+    hosts_from_env,
+    origins_from_env,
+    with_internal_hosts,
+    with_local_origins,
+)
 
 
 logging.basicConfig(
@@ -75,25 +80,29 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = hosts_from_env(
-    os.getenv('DJANGO_ALLOWED_HOSTS'),
-    [
-        '127.0.0.1',
-        '212.227.250.38',
-        'localhost',
-        'gkablog.com',
-        'www.gkablog.com',
-    ],
+ALLOWED_HOSTS = with_internal_hosts(
+    hosts_from_env(
+        os.getenv('DJANGO_ALLOWED_HOSTS'),
+        [
+            '127.0.0.1',
+            '212.227.250.38',
+            'localhost',
+            'gkablog.com',
+            'www.gkablog.com',
+        ],
+    ),
 )
 
-CSRF_TRUSTED_ORIGINS = origins_from_env(
-    os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS'),
-    [
-        'https://gkablog.com',
-        'https://www.gkablog.com',
-        'http://localhost:3000',
-        'http://localhost:8000',
-    ],
+CSRF_TRUSTED_ORIGINS = with_local_origins(
+    origins_from_env(
+        os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS'),
+        [
+            'https://gkablog.com',
+            'https://www.gkablog.com',
+            'http://localhost:3000',
+            'http://localhost:8000',
+        ],
+    ),
 )
 
 
@@ -106,6 +115,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'blog',
 ]
 
@@ -200,6 +210,8 @@ STATICFILES_DIRS = [
 
 # STATIC_ROOT will be for collectstatic in production
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 STORAGES = {
     'default': {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
@@ -221,14 +233,52 @@ LOGIN_REDIRECT_URL = '/'
 
 POST_COUNT_ON_PAGE = 10
 PROJECT_COUNT_ON_PAGE = 10
+WORDS_PER_MINUTE = 225
+COMMENT_MIN_LENGTH = 3
+COMMENT_MAX_LENGTH = 3000
+COMMENT_MAX_URLS = 2
+COMMENT_DUPLICATE_SECONDS = 600
+COMMENT_RATE_PER_MINUTE = int(
+    os.getenv('COMMENT_RATE_PER_MINUTE', '3')
+)
+COMMENT_RATE_PER_10_MINUTES = int(
+    os.getenv('COMMENT_RATE_PER_10_MINUTES', '10')
+)
+COMMENT_RATE_PER_DAY = int(
+    os.getenv('COMMENT_RATE_PER_DAY', '30')
+)
 
-#SECURE_HSTS_SECONDS = 31536000
-#SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-#SECURE_HSTS_PRELOAD = True
+CACHES = {
+    'default': {
+        'BACKEND': (
+            'django.core.cache.backends.locmem.LocMemCache'
+        ),
+        'LOCATION': 'blog-cache',
+    }
+}
 
-# Redirect all HTTP to HTTPS
-#SECURE_SSL_REDIRECT = True
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
 
-# Secure cookies
-#SESSION_COOKIE_SECURE = True
-#CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_PATH = '/'
+CSRF_COOKIE_PATH = '/'
+
+if os.getenv('DJANGO_BEHIND_PROXY', '0') == '1':
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = (
+        'HTTP_X_FORWARDED_PROTO',
+        'https',
+    )
+
+if os.getenv('DJANGO_SECURE_COOKIES', '0') == '1':
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

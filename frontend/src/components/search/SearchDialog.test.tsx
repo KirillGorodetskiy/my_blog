@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchDialog } from '@/components/search/SearchDialog';
 import { SearchProvider } from '@/components/search/SearchContext';
 import { useSearchOverlay } from '@/components/search/SearchContext';
@@ -27,6 +27,31 @@ function OpenSearch({
 }
 
 describe('SearchDialog', () => {
+  beforeEach(() => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          articles: [
+            {
+              slug: 'personal-rag-vps',
+              title: 'How I Set Up a Personal RAG System on a VPS',
+              excerpt: 'A quiet retrieval setup',
+              category: 'Development',
+              tags: ['rag'],
+            },
+          ],
+          projects: [],
+        }),
+      }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
   it('filters results and opens the selected article', async () => {
     const user = userEvent.setup();
 
@@ -43,11 +68,13 @@ describe('SearchDialog', () => {
       'rag',
     );
 
-    expect(
-      screen.getByRole('option', {
-        name: /Personal RAG System on a VPS/i,
-      }),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', {
+          name: /Personal RAG System on a VPS/i,
+        }),
+      ).toBeInTheDocument();
+    });
 
     await user.keyboard('{Enter}');
 

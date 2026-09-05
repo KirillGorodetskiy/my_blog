@@ -8,22 +8,26 @@ import {
 
 export function AboutHero() {
   return (
-    <section className='relative overflow-hidden bg-[#05090a]'>
-      <HeroArtwork>
-        <Image
-          src='/images/about-hero.jpg'
-          alt={
-            'Night view from a mountain shelter. A man with ' +
-            'glasses sits under a blanket and looks out over ' +
-            'a dark lake, moon, and Milky Way.'
-          }
-          width={1024}
-          height={438}
-          unoptimized
-          priority
-          className='h-auto w-full'
-        />
-      </HeroArtwork>
+    <section
+      className='scene-hero relative overflow-hidden bg-[#05090a]'
+    >
+      <div className='scene-hero-art-wrap'>
+        <HeroArtwork>
+          <Image
+            src='/images/about-hero.jpg'
+            alt={
+              'Night view from a mountain shelter. A man ' +
+              'with glasses sits under a blanket and looks ' +
+              'out over a dark lake, moon, and Milky Way.'
+            }
+            width={1024}
+            height={438}
+            unoptimized
+            priority
+            className='scene-hero-art h-auto w-full'
+          />
+        </HeroArtwork>
+      </div>
       <div
         className={
           'absolute inset-0 bg-gradient-to-r from-[#05090a]/86 ' +
@@ -38,8 +42,9 @@ export function AboutHero() {
       />
       <HeroCopy
         className={
-          'absolute inset-0 z-10 mx-auto flex max-w-6xl ' +
-          'flex-col justify-end px-5 pb-12 pt-24 md:px-8'
+          'scene-hero-copy absolute inset-0 z-10 mx-auto ' +
+          'flex max-w-6xl flex-col justify-end px-5 pb-12 ' +
+          'pt-24 md:px-8'
         }
       >
         <h1

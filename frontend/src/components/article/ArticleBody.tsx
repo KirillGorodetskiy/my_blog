@@ -1,7 +1,7 @@
 import { CodeBlock } from '@/components/article/CodeBlock';
 import { HeadingBlock } from '@/components/article/HeadingBlock';
 import { InlineNodes } from '@/components/article/InlineNodes';
-import { MediaPlaceholder } from '@/components/ui/MediaPlaceholder';
+import { ContentMedia } from '@/components/ui/ContentMedia';
 import {
   parseMarkdown,
   type ContentBlock,
@@ -54,7 +54,7 @@ function BlockView({ block }: { block: ContentBlock }) {
 
   return (
     <figure className='article-figure'>
-      <MediaPlaceholder
+      <ContentMedia
         src={block.src}
         label={block.alt || `Figure · ${block.src}`}
         className='aspect-[16/9] w-full rounded-xl'

@@ -1,9 +1,17 @@
 import type { MetadataRoute } from 'next';
-import { articles } from '@/data/articles';
-import { projects } from '@/data/projects';
+import { listArticles } from '@/lib/api/articles';
+import { listProjects } from '@/lib/api/projects';
 import { SITE_URL } from '@/lib/site';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = 'force-dynamic';
+
+export default async function sitemap(): Promise<
+  MetadataRoute.Sitemap
+> {
+  const [articles, projects] = await Promise.all([
+    listArticles(),
+    listProjects(),
+  ]);
   const staticRoutes = [
     '',
     '/articles',
@@ -13,12 +21,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${SITE_URL}${path || '/'}`,
     lastModified: new Date(),
   }));
-
   const articleRoutes = articles.map((article) => ({
     url: `${SITE_URL}/articles/${article.slug}`,
     lastModified: new Date(`${article.date}T00:00:00Z`),
   }));
-
   const projectRoutes = projects.map((project) => ({
     url: `${SITE_URL}/projects/${project.slug}`,
     lastModified: new Date(),

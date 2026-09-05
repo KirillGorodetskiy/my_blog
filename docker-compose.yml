@@ -29,11 +29,12 @@ services:
       DUMP_DIR: /dumps
     volumes:
       - ./db/dumps:/dumps:ro
+      - backend_media:/app/backend/media
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - '8000:8000'
+      - '127.0.0.1:8000:8000'
     healthcheck:
       test: [
         'CMD',
@@ -53,13 +54,16 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://gkablog.com}
+        INTERNAL_API_URL: http://backend:8000
     environment:
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://gkablog.com}
+      INTERNAL_API_URL: http://backend:8000
     ports:
-      - '3000:3000'
+      - '127.0.0.1:3000:3000'
     depends_on:
       - backend
     restart: unless-stopped
 
 volumes:
   postgres_data:
+  backend_media:

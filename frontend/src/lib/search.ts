@@ -1,5 +1,6 @@
 import { articles } from '@/data/articles';
 import { projects } from '@/data/projects';
+import type { Article, Project } from '@/data/types';
 
 export type SearchGroup =
   | 'Articles'
@@ -14,7 +15,7 @@ export interface SearchItem {
   haystack: string;
 }
 
-const NAVIGATION: SearchItem[] = [
+export const NAVIGATION: SearchItem[] = [
   {
     group: 'Navigation',
     title: 'Home',
@@ -45,8 +46,11 @@ const NAVIGATION: SearchItem[] = [
   },
 ];
 
-export function buildSearchItems(): SearchItem[] {
-  const articleItems = articles.map((article) => ({
+export function buildSearchItems(
+  articleItems: Article[] = articles,
+  projectItems: Project[] = projects,
+): SearchItem[] {
+  const mappedArticles = articleItems.map((article) => ({
     group: 'Articles' as const,
     title: article.title,
     href: `/articles/${article.slug}`,
@@ -59,7 +63,7 @@ export function buildSearchItems(): SearchItem[] {
     ].join(' ').toLowerCase(),
   }));
 
-  const projectItems = projects.map((project) => ({
+  const mappedProjects = projectItems.map((project) => ({
     group: 'Projects' as const,
     title: project.title,
     href: `/projects/${project.slug}`,
@@ -72,7 +76,7 @@ export function buildSearchItems(): SearchItem[] {
     ].join(' ').toLowerCase(),
   }));
 
-  return [...articleItems, ...projectItems, ...NAVIGATION];
+  return [...mappedArticles, ...mappedProjects, ...NAVIGATION];
 }
 
 export function searchItems(

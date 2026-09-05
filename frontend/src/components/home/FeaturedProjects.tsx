@@ -1,9 +1,13 @@
-import { projects } from '@/data/projects';
 import { featuredItems } from '@/lib/filters';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { SectionHeading } from '@/components/ui/SectionHeading';
+import type { Project } from '@/data/types';
 
-export function FeaturedProjects() {
+export function FeaturedProjects({
+  projects,
+}: {
+  projects: Project[];
+}) {
   const featured = featuredItems(projects, 3);
 
   return (

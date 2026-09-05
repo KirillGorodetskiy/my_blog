@@ -1,7 +1,6 @@
 import { RelatedList } from '@/components/article/RelatedList';
-import { MediaPlaceholder } from '@/components/ui/MediaPlaceholder';
+import { ContentMedia } from '@/components/ui/ContentMedia';
 import { UNWRITTEN, type Project } from '@/data/types';
-import { getRelatedProjects } from '@/lib/content';
 
 function Section({
   title,
@@ -24,10 +23,11 @@ function Prose({ text }: { text: string }) {
 
 export function ProjectDetail({
   project,
+  related = [],
 }: {
   project: Project;
+  related?: Project[];
 }) {
-  const related = getRelatedProjects(project.slug);
 
   return (
     <article>
@@ -39,9 +39,9 @@ export function ProjectDetail({
         </p>
         <h1 className='project-title'>{project.title}</h1>
         <p className='project-summary'>{project.description}</p>
-        <MediaPlaceholder
+        <ContentMedia
           src={project.image}
-          label={`Pending artwork for ${project.title}`}
+          label={`Artwork for ${project.title}`}
           className='project-cover'
         />
       </header>
@@ -80,7 +80,7 @@ export function ProjectDetail({
             <div className='project-shots'>
               {project.screenshots.map((shot) => (
                 <figure key={shot.src}>
-                  <MediaPlaceholder
+                  <ContentMedia
                     src={shot.src}
                     label={shot.alt}
                     className='aspect-[16/10] w-full rounded-xl'

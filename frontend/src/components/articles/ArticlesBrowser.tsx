@@ -2,10 +2,8 @@
 
 import { useMemo } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  ARTICLE_CATEGORIES,
-  articles,
-} from '@/data/articles';
+import { ARTICLE_CATEGORIES } from '@/data/articles';
+import type { Article } from '@/data/types';
 import {
   categoryToParam,
   filterByCategory,
@@ -18,13 +16,17 @@ import {
   type ArticleFilterValue,
 } from '@/components/articles/ArticleFilters';
 
-export function ArticlesBrowser() {
+export function ArticlesBrowser({
+  articles,
+}: {
+  articles: Article[];
+}) {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const options = useMemo<ArticleFilterValue[]>(
     () => ['All', ...usedCategories(articles, ARTICLE_CATEGORIES)],
-    [],
+    [articles],
   );
   const active = paramToCategory(
     params.get('tag'),
@@ -32,7 +34,7 @@ export function ArticlesBrowser() {
   );
   const visible = useMemo(
     () => filterByCategory(articles, active),
-    [active],
+    [active, articles],
   );
 
   function onChange(value: ArticleFilterValue) {

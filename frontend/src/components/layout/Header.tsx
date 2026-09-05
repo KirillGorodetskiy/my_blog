@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, Search } from 'lucide-react';
 import { useState } from 'react';
+import { AuthControls } from '@/components/auth/AuthControls';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { useSearchOverlay } from '@/components/search/SearchContext';
 import { Button } from '@/components/ui/Button';
@@ -103,6 +104,12 @@ export function Header() {
           >
             <Search size={18} strokeWidth={1.6} />
           </button>
+          <div className='md:hidden'>
+            <AuthControls compact />
+          </div>
+          <div className='hidden md:block'>
+            <AuthControls />
+          </div>
           <div className='hidden md:block'>
             <Button
               href='mailto:hello@gkablog.com'

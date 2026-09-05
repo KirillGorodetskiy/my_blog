@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ProjectsBrowser } from '@/components/projects/ProjectsBrowser';
 import { ProjectsHero } from '@/components/projects/ProjectsHero';
+import { listProjects } from '@/lib/api/projects';
 
 export const metadata: Metadata = {
   title: 'Projects',
@@ -15,12 +16,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ProjectsPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function ProjectsPage() {
+  const projects = await listProjects();
+
   return (
     <>
       <ProjectsHero />
       <Suspense>
-        <ProjectsBrowser />
+        <ProjectsBrowser projects={projects} />
       </Suspense>
     </>
   );

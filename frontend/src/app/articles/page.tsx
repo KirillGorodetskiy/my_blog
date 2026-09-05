@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ArticlesBrowser } from '@/components/articles/ArticlesBrowser';
 import { ArticlesHero } from '@/components/articles/ArticlesHero';
+import { listArticles } from '@/lib/api/articles';
 
 export const metadata: Metadata = {
   title: 'Articles',
@@ -15,12 +16,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ArticlesPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function ArticlesPage() {
+  const articles = await listArticles();
+
   return (
     <>
       <ArticlesHero />
       <Suspense>
-        <ArticlesBrowser />
+        <ArticlesBrowser articles={articles} />
       </Suspense>
     </>
   );

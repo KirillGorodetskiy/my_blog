@@ -8,22 +8,26 @@ import {
 
 export function ArticlesHero() {
   return (
-    <section className='relative overflow-hidden bg-[#05090a]'>
-      <HeroArtwork>
-        <Image
-          src='/images/articles-hero.jpg'
-          alt={
-            'A man reads in a dark wood library at night, ' +
-            'with snow-capped mountains visible through a ' +
-            'window.'
-          }
-          width={1024}
-          height={341}
-          unoptimized
-          priority
-          className='h-auto w-full'
-        />
-      </HeroArtwork>
+    <section
+      className='scene-hero relative overflow-hidden bg-[#05090a]'
+    >
+      <div className='scene-hero-art-wrap'>
+        <HeroArtwork>
+          <Image
+            src='/images/articles-hero.jpg'
+            alt={
+              'A man reads in a dark wood library at night, ' +
+              'with snow-capped mountains visible through a ' +
+              'window.'
+            }
+            width={1024}
+            height={341}
+            unoptimized
+            priority
+            className='scene-hero-art h-auto w-full'
+          />
+        </HeroArtwork>
+      </div>
       <div
         className={
           'absolute inset-0 bg-gradient-to-r from-[#05090a]/72 ' +
@@ -38,8 +42,9 @@ export function ArticlesHero() {
       />
       <HeroCopy
         className={
-          'absolute inset-0 z-10 mx-auto flex max-w-6xl ' +
-          'flex-col justify-end px-5 pb-12 pt-24 md:px-8'
+          'scene-hero-copy absolute inset-0 z-10 mx-auto ' +
+          'flex max-w-6xl flex-col justify-end px-5 pb-12 ' +
+          'pt-24 md:px-8'
         }
       >
         <h1

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { AuthControls } from '@/components/auth/AuthControls';
 import { isCurrentPath } from '@/lib/nav';
 
 export interface MobileNavLink {
@@ -111,6 +112,9 @@ export function MobileNav({
             );
           })}
         </nav>
+        <div className='mt-8'>
+          <AuthControls />
+        </div>
         <a
           href='mailto:hello@gkablog.com'
           className={

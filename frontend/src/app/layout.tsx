@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Newsreader, Outfit } from 'next/font/google';
+import { AuthProvider } from '@/components/auth/AuthContext';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { EdgeCues } from '@/components/navigation/EdgeCues';
@@ -64,18 +65,20 @@ export default function RootLayout({
       }
     >
       <body className='min-h-full bg-[#05090a] text-[#edf3ef]'>
-        <SearchProvider>
-          <TransitionProvider>
-            <Header />
-            <SearchShortcut />
-            <RoomShortcuts />
-            <EdgeCues />
-            <SearchDialog />
-            <AdjacentRoomPreload />
-            <RoomTransition>{children}</RoomTransition>
-            <Footer />
-          </TransitionProvider>
-        </SearchProvider>
+        <AuthProvider>
+          <SearchProvider>
+            <TransitionProvider>
+              <Header />
+              <SearchShortcut />
+              <RoomShortcuts />
+              <EdgeCues />
+              <SearchDialog />
+              <AdjacentRoomPreload />
+              <RoomTransition>{children}</RoomTransition>
+              <Footer />
+            </TransitionProvider>
+          </SearchProvider>
+        </AuthProvider>
       </body>
     </html>
   );
