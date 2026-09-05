@@ -5,6 +5,7 @@ import logging
 from dotenv import load_dotenv
 
 from backend.utils.config_check import check_required_env_vars
+from backend.utils.env_lists import hosts_from_env, origins_from_env
 
 
 logging.basicConfig(
@@ -52,6 +53,9 @@ REQUIRED_ENV_VARS = (
     'DB_PASSWORD',
     'DB_HOST',
     'DB_PORT',
+)
+
+TEST_ENV_VARS = (
     'TEST_DB_NAME',
     'TEST_DB_USER',
     'TEST_DB_PASSWORD',
@@ -69,15 +73,28 @@ check_required_env_vars(REQUIRED_ENV_VARS)
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv('DJANGO_DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    '212.227.250.38',
-    'localhost',
-    'gkablog.com',
-    'www.gkablog.com'
-]
+ALLOWED_HOSTS = hosts_from_env(
+    os.getenv('DJANGO_ALLOWED_HOSTS'),
+    [
+        '127.0.0.1',
+        '212.227.250.38',
+        'localhost',
+        'gkablog.com',
+        'www.gkablog.com',
+    ],
+)
+
+CSRF_TRUSTED_ORIGINS = origins_from_env(
+    os.getenv('DJANGO_CSRF_TRUSTED_ORIGINS'),
+    [
+        'https://gkablog.com',
+        'https://www.gkablog.com',
+        'http://localhost:3000',
+        'http://localhost:8000',
+    ],
+)
 
 
 # Application definition
@@ -94,6 +111,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -137,6 +155,7 @@ DATABASES = {
 }
 
 if any('pytest' in a for a in sys.argv) or os.getenv('DJANGO_TESTING') == '1':
+    check_required_env_vars(TEST_ENV_VARS)
     DATABASES['default'].update({
         'USER': os.getenv('TEST_DB_USER'),
         'PASSWORD': os.getenv('TEST_DB_PASSWORD'),
@@ -181,6 +200,16 @@ STATICFILES_DIRS = [
 
 # STATIC_ROOT will be for collectstatic in production
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': (
+            'whitenoise.storage.CompressedStaticFilesStorage'
+        ),
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

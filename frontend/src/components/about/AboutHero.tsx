@@ -1,0 +1,59 @@
+'use client';
+
+import Image from 'next/image';
+import {
+  HeroArtwork,
+  HeroCopy,
+} from '@/components/transitions/HeroLayers';
+
+export function AboutHero() {
+  return (
+    <section className='relative overflow-hidden bg-[#05090a]'>
+      <HeroArtwork>
+        <Image
+          src='/images/about-hero.jpg'
+          alt={
+            'Night view from a mountain shelter. A man with ' +
+            'glasses sits under a blanket and looks out over ' +
+            'a dark lake, moon, and Milky Way.'
+          }
+          width={1024}
+          height={438}
+          unoptimized
+          priority
+          className='h-auto w-full'
+        />
+      </HeroArtwork>
+      <div
+        className={
+          'absolute inset-0 bg-gradient-to-r from-[#05090a]/86 ' +
+          'via-[#05090a]/40 to-transparent'
+        }
+      />
+      <div
+        className={
+          'absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t ' +
+          'from-[#05090a] to-transparent'
+        }
+      />
+      <HeroCopy
+        className={
+          'absolute inset-0 z-10 mx-auto flex max-w-6xl ' +
+          'flex-col justify-end px-5 pb-12 pt-24 md:px-8'
+        }
+      >
+        <h1
+          className={
+            'font-serif text-5xl tracking-tight text-[#edf3ef] ' +
+            'md:text-6xl'
+          }
+        >
+          About
+        </h1>
+        <p className='mt-4 max-w-lg text-lg text-[#c3d0ca]'>
+          A quieter room for thinking, building, and writing.
+        </p>
+      </HeroCopy>
+    </section>
+  );
+}

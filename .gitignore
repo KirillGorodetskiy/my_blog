@@ -12,3 +12,9 @@ wheels/
 *.log
 
 .env
+
+node_modules/
+.next/
+
+db/dumps/*
+!db/dumps/.gitkeep
